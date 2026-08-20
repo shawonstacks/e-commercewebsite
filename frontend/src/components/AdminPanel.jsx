@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ArrowLeft, Plus, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 
 export default function AdminPanel({ onBack }) {
   const [products, setProducts] = useState([]);
@@ -12,13 +12,16 @@ export default function AdminPanel({ onBack }) {
   });
   const [file, setFile] = useState(null);
 
+  // ডায়নামিক Hostname (এটি অটোমেটিক 172.16.54.178 ধরে নেবে)
+  const API_BASE_URL = `http://${window.location.hostname}:5000`;
+
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://172.16.54.178:5000/api/products');
+      const res = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -36,7 +39,6 @@ export default function AdminPanel({ onBack }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // FormData তৈরি করা হচ্ছে ফাইল পাঠানোর জন্য
     const data = new FormData();
     data.append('name', formData.name);
     data.append('price', formData.price);
@@ -47,13 +49,13 @@ export default function AdminPanel({ onBack }) {
     }
 
     try {
-      await axios.post('http://172.16.54.178:5000/api/products', data, {
+      await axios.post(`${API_BASE_URL}/api/products`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Product added successfully!');
       setFormData({ name: '', price: '', category: 'Terrarium', description: '' });
       setFile(null);
-      fetchProducts(); // নতুন প্রোডাক্ট শো করার জন্য
+      fetchProducts();
     } catch (err) {
       console.error(err);
       alert('Failed to add product');
@@ -63,12 +65,17 @@ export default function AdminPanel({ onBack }) {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://172.16.54.178:5000/api/products/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/products/${id}`);
         fetchProducts();
       } catch (err) {
         console.error(err);
       }
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    return url.replace('localhost', window.location.hostname);
   };
 
   return (
@@ -82,7 +89,6 @@ export default function AdminPanel({ onBack }) {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Add Product Form */}
           <div className="bg-[#141f1a] border border-emerald-900/40 p-6 rounded-2xl">
             <h3 className="text-xl font-bold text-emerald-100 mb-4">Add New Product</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,7 +132,6 @@ export default function AdminPanel({ onBack }) {
                 </div>
               </div>
 
-              {/* সরাসরি ছবি ফাইল চুজ করার বাটন */}
               <div>
                 <label className="text-xs text-stone-400 block mb-1">Product Image (Select from PC)</label>
                 <input 
@@ -160,14 +165,13 @@ export default function AdminPanel({ onBack }) {
             </form>
           </div>
 
-          {/* Product List */}
           <div className="lg:col-span-2 bg-[#141f1a] border border-emerald-900/40 p-6 rounded-2xl">
             <h3 className="text-xl font-bold text-emerald-100 mb-4">All Products ({products.length})</h3>
             <div className="space-y-3">
               {products.map((product) => (
                 <div key={product._id} className="flex items-center justify-between p-3 bg-[#0d1411] rounded-xl border border-emerald-900/30">
                   <div className="flex items-center gap-3">
-                    <img src={product.imageUrl} alt={product.name} className="w-12 h-12 object-cover rounded-lg" />
+                    <img src={getImageUrl(product.imageUrl)} alt={product.name} className="w-12 h-12 object-cover rounded-lg" />
                     <div>
                       <h4 className="font-bold text-sm text-emerald-50">{product.name}</h4>
                       <p className="text-xs text-stone-400">৳ {product.price} • {product.category}</p>

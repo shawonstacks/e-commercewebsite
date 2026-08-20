@@ -18,11 +18,14 @@ function App() {
   const whatsappNumber = "8801715985372"; 
   const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
 
+  // ডায়নামিক Hostname দিয়ে API Call
+  const API_BASE_URL = `http://${window.location.hostname}:5000`;
+
   useEffect(() => {
-    axios.get('http://localhost:5000/api/products')
+    axios.get(`${API_BASE_URL}/api/products`)
       .then(res => setProducts(res.data))
       .catch(err => console.error(err));
-  }, []);
+  }, [API_BASE_URL]);
 
   const addToCart = (product) => {
     const existing = cart.find(item => item._id === product._id);
@@ -37,6 +40,15 @@ function App() {
   };
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // ইমেজ URL সার্ভারের IP/Domain অনুযায়ী ফিক্স করার ফাংশন
+  const getImageUrl = (url) => {
+    if (!url || url.includes('via.placeholder')) {
+      return "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600";
+    }
+    // যদি ডাটাবেজে http://localhost:5000 সেভ হয়ে থাকে, সেটাকে বর্তমান হোস্টনেমে রূপান্তর করবে
+    return url.replace('localhost', window.location.hostname);
+  };
 
   if (window.location.pathname === '/admin') {
     return <AdminPanel onBack={() => window.location.href = '/'} />;
@@ -109,9 +121,7 @@ function App() {
               >
                 <div onClick={() => setSelectedProduct(product)}>
                   <img 
-                    src={product.imageUrl && !product.imageUrl.includes('via.placeholder') 
-                      ? product.imageUrl 
-                      : "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600"} 
+                    src={getImageUrl(product.imageUrl)} 
                     alt={product.name} 
                     className="w-full h-56 object-cover group-hover:scale-105 transition duration-500" 
                   />
