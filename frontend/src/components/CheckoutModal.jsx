@@ -1,29 +1,41 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { X, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle } from 'lucide-react';
 
-function CheckoutModal({ isOpen, onClose, cart, setCart }) {
+export default function CheckoutModal({ isOpen, onClose, cart, setCart }) {
   const [formData, setFormData] = useState({ name: '', phone: '', address: '' });
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // ডায়নামিক Hostname (এটি অটোমেটিক IP ধরে নেবে)
+  const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
-    // ব্যাকএন্ডে অর্ডার ডাটা পাঠানো
-    axios.post('http://localhost:5000/api/orders', {
-      customer: formData,
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const orderData = {
+      customerName: formData.name,
+      phone: formData.phone,
+      address: formData.address,
       items: cart,
       totalAmount: totalAmount
-    })
-    .then(() => {
+    };
+
+    try {
+      await axios.post(`${API_BASE_URL}/api/orders`, orderData);
       setIsSuccess(true);
-      setCart([]); // কার্ট খালি করে দেওয়া
-    })
-    .catch((err) => console.error("Order submit error:", err));
+      setCart([]); // কার্ট ক্লিয়ার করে দেওয়া হচ্ছে
+    } catch (err) {
+      console.error(err);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -33,82 +45,79 @@ function CheckoutModal({ isOpen, onClose, cart, setCart }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-[#121d18] border border-emerald-900/60 w-full max-w-md rounded-2xl p-6 text-stone-200 relative shadow-2xl">
-        
-        {/* Close Button */}
-        <button onClick={handleClose} className="absolute top-4 right-4 text-stone-400 hover:text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#141f1a] border border-emerald-900/60 rounded-2xl w-full max-w-md p-6 relative text-stone-200">
+        <button 
+          onClick={handleClose} 
+          className="absolute top-4 right-4 text-stone-400 hover:text-stone-100"
+        >
           <X className="w-5 h-5" />
         </button>
 
         {isSuccess ? (
           <div className="text-center py-6">
-            <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4 animate-bounce" />
-            <h3 className="text-2xl font-bold text-emerald-100">Order Confirmed!</h3>
-            <p className="text-stone-400 text-xs mt-2 leading-relaxed">
-              Thank you for ordering from The Moss Wanderer. We will process your order shortly.
+            <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-emerald-100">Order Placed Successfully!</h3>
+            <p className="text-stone-400 text-sm mt-2">
+              Thank you for your order, {formData.name}. We will contact you shortly.
             </p>
             <button 
-              onClick={handleClose} 
-              className="mt-6 w-full bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold py-2.5 rounded-xl text-xs transition"
+              onClick={handleClose}
+              className="mt-6 w-full bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold py-3 rounded-xl transition"
             >
-              Back to Shop
+              Close
             </button>
           </div>
         ) : (
-          <div>
+          <>
             <h3 className="text-xl font-bold text-emerald-100 mb-1">Checkout Details</h3>
-            <p className="text-stone-400 text-xs mb-4">Total Amount: <span className="text-emerald-400 font-bold">৳ {totalAmount}</span></p>
+            <p className="text-xs text-stone-400 mb-4">Total Amount: <span className="text-emerald-400 font-bold">৳ {totalAmount}</span></p>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs text-stone-300 mb-1">Your Name</label>
+                <label className="text-xs text-stone-400 block mb-1">Your Name</label>
                 <input 
                   type="text" 
-                  required
-                  placeholder="e.g. Rahul Hasan"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-[#182620] border border-emerald-900/50 rounded-xl px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-emerald-500"
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-[#0d1411] border border-emerald-900/60 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500"
+                  required 
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-stone-300 mb-1">Phone Number</label>
+                <label className="text-xs text-stone-400 block mb-1">Phone Number</label>
                 <input 
                   type="tel" 
-                  required
-                  placeholder="017XXXXXXXX"
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full bg-[#182620] border border-emerald-900/50 rounded-xl px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-emerald-500"
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full bg-[#0d1411] border border-emerald-900/60 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500"
+                  required 
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-stone-300 mb-1">Delivery Address</label>
+                <label className="text-xs text-stone-400 block mb-1">Delivery Address</label>
                 <textarea 
-                  required
-                  rows="3"
-                  placeholder="Full address with house/road number"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="w-full bg-[#182620] border border-emerald-900/50 rounded-xl px-3 py-2 text-xs text-stone-100 focus:outline-none focus:border-emerald-500"
-                ></textarea>
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  rows="3"
+                  className="w-full bg-[#0d1411] border border-emerald-900/60 rounded-xl p-3 text-sm focus:outline-none focus:border-emerald-500"
+                  required 
+                />
               </div>
 
               <button 
                 type="submit" 
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold py-3 rounded-xl transition text-xs mt-2 shadow-lg shadow-emerald-900/40"
+                disabled={loading}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold py-3 rounded-xl transition duration-300 disabled:opacity-50"
               >
-                Confirm Order (Cash on Delivery)
+                {loading ? 'Placing Order...' : 'Confirm Order (Cash on Delivery)'}
               </button>
             </form>
-          </div>
+          </>
         )}
       </div>
     </div>
   );
 }
-
-export default CheckoutModal;
