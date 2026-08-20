@@ -18,7 +18,7 @@ export default function AdminPanel({ onBack }) {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get('http://172.16.54.178:5000/api/products');
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -47,7 +47,7 @@ export default function AdminPanel({ onBack }) {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/products', data, {
+      await axios.post('http://172.16.54.178:5000/api/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Product added successfully!');
@@ -63,7 +63,7 @@ export default function AdminPanel({ onBack }) {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await axios.delete(`http://172.16.54.178:5000/api/products/${id}`);
         fetchProducts();
       } catch (err) {
         console.error(err);
