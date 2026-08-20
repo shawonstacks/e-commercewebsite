@@ -12,14 +12,23 @@ router.get('/', async (req, res) => {
   }
 });
 
-// নতুন অর্ডার সেভ করা
+// নতুন অর্ডার সেভ করা (Updated Payload Matching)
 router.post('/', async (req, res) => {
-  const { customer, items, totalAmount } = req.body;
   try {
-    const newOrder = new Order({ customer, items, totalAmount });
-    await newOrder.save();
-    res.status(201).json(newOrder);
+    const { customerName, phone, address, items, totalAmount } = req.body;
+
+    const newOrder = new Order({
+      customerName,
+      phone,
+      address,
+      items,
+      totalAmount
+    });
+
+    const savedOrder = await newOrder.save();
+    res.status(201).json(savedOrder);
   } catch (err) {
+    console.error("Order Save Error:", err);
     res.status(400).json({ message: err.message });
   }
 });
