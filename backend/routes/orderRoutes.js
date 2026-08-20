@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
-// সব অর্ডার পাওয়ার জন্য (Admin-এর জন্য)
+// Get All Orders
 router.get('/', async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// নতুন অর্ডার সেভ করা (Updated Payload Matching)
+// Create Order
 router.post('/', async (req, res) => {
   try {
     const { customerName, phone, address, items, totalAmount } = req.body;
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
     const savedOrder = await newOrder.save();
     res.status(201).json(savedOrder);
   } catch (err) {
-    console.error("Order Save Error:", err);
+    console.error("Order creation error:", err);
     res.status(400).json({ message: err.message });
   }
 });

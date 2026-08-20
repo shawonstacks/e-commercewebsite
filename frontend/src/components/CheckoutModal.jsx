@@ -10,8 +10,6 @@ export default function CheckoutModal({ isOpen, onClose, cart, setCart }) {
   if (!isOpen) return null;
 
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-  // ডায়নামিক Hostname (এটি অটোমেটিক IP ধরে নেবে)
   const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
   const handleSubmit = async (e) => {
@@ -29,7 +27,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, setCart }) {
     try {
       await axios.post(`${API_BASE_URL}/api/orders`, orderData);
       setIsSuccess(true);
-      setCart([]); // কার্ট ক্লিয়ার করে দেওয়া হচ্ছে
+      setCart([]);
     } catch (err) {
       console.error(err);
       alert('Failed to place order. Please try again.');
@@ -47,10 +45,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, setCart }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="bg-[#141f1a] border border-emerald-900/60 rounded-2xl w-full max-w-md p-6 relative text-stone-200">
-        <button 
-          onClick={handleClose} 
-          className="absolute top-4 right-4 text-stone-400 hover:text-stone-100"
-        >
+        <button onClick={handleClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-100">
           <X className="w-5 h-5" />
         </button>
 
