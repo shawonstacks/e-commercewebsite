@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ShoppingBag, MoreVertical, X } from 'lucide-react';
+import { ShoppingBag, MoreVertical, X, User } from 'lucide-react';
 
-export default function Navbar({ cartCount, onOpenCart }) {
+export default function Navbar({ cartCount, onOpenCart, onOpenAuth, user, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -82,18 +82,35 @@ export default function Navbar({ cartCount, onOpenCart }) {
           </div>
         </div>
 
-        {/* Right Side: Cart Button */}
-        <button 
-          onClick={onOpenCart}
-          className="relative bg-[#e5e3d8] border border-[#c4c1b2] p-2 md:p-2.5 rounded-xl hover:bg-[#dad7ca] transition-colors"
-        >
-          <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-[#1f382b]" />
-          {cartCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-[#1f382b] text-[#f2f1ea] font-bold text-[9px] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shadow-md">
-              {cartCount}
-            </span>
+        {/* Right Side: User Auth & Cart Buttons */}
+        <div className="flex items-center gap-2">
+          
+          {/* User Profile / Login Button */}
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-[#1e2e24]">{user.name}</span>
+              <button onClick={onLogout} className="text-[10px] text-red-600 underline">Logout</button>
+            </div>
+          ) : (
+            <button onClick={onOpenAuth} className="p-2 bg-[#e5e3d8] border border-[#c4c1b2] rounded-xl hover:bg-[#dad7ca] transition">
+              <User className="w-4 h-4 text-[#1f382b]" />
+            </button>
           )}
-        </button>
+
+          {/* Cart Button */}
+          <button 
+            onClick={onOpenCart}
+            className="relative bg-[#e5e3d8] border border-[#c4c1b2] p-2 md:p-2.5 rounded-xl hover:bg-[#dad7ca] transition-colors"
+          >
+            <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-[#1f382b]" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#1f382b] text-[#f2f1ea] font-bold text-[9px] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shadow-md">
+                {cartCount}
+              </span>
+            )}
+          </button>
+
+        </div>
 
       </div>
     </nav>
