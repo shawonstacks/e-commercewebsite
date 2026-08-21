@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import ProductModal from './components/ProductModal';
+import AuthModal from './components/AuthModal';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
 import { Leaf, Sparkles, MessageCircle } from 'lucide-react';
@@ -14,6 +15,13 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Auth States
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('userData');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
   const whatsappNumber = "8801715985373"; 
   const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
@@ -39,6 +47,12 @@ function App() {
     setIsCartOpen(true);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    setUser(null);
+  };
+
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // ইমেজ URL সার্ভারের IP/Domain অনুযায়ী ফিক্স করার ফাংশন
@@ -56,7 +70,14 @@ function App() {
   return (
     <div className="min-h-screen bg-[#0d1411] text-stone-200 font-sans relative flex flex-col justify-between">
       <div>
-        <Navbar cartCount={totalCartCount} onOpenCart={() => setIsCartOpen(true)} />
+        {/* Navbar with Auth Props */}
+        <Navbar 
+          cartCount={totalCartCount} 
+          onOpenCart={() => setIsCartOpen(true)} 
+          onOpenAuth={() => setIsAuthOpen(true)}
+          user={user}
+          onLogout={handleLogout}
+        />
         
         <CartDrawer 
           isOpen={isCartOpen} 
@@ -77,6 +98,13 @@ function App() {
           product={selectedProduct} 
           onClose={() => setSelectedProduct(null)} 
           onAddToCart={addToCart} 
+        />
+
+        {/* Customer Auth Login Modal */}
+        <AuthModal 
+          isOpen={isAuthOpen} 
+          onClose={() => setIsAuthOpen(false)} 
+          onLoginSuccess={(userData) => setUser(userData)} 
         />
 
         {/* Floating WhatsApp Button */}
@@ -120,7 +148,6 @@ function App() {
                 className="bg-[#141f1a] border border-emerald-900/40 rounded-xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
               >
                 <div onClick={() => setSelectedProduct(product)}>
-                  {/* Image Height Reduced to h-36 on mobile, h-44 on desktop */}
                   <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
                     <img 
                       src={getImageUrl(product.imageUrl)} 
