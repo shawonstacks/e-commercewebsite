@@ -18,7 +18,7 @@ function App() {
   const whatsappNumber = "8801715985372"; 
   const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
 
-  // ডায়নামিক Hostname দিয়ে API Call
+  // ডায়নামিক Hostname দিয়ে API Call
   const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
   useEffect(() => {
@@ -41,12 +41,11 @@ function App() {
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // ইমেজ URL সার্ভারের IP/Domain অনুযায়ী ফিক্স করার ফাংশন
+  // ইমেজ URL সার্ভারের IP/Domain অনুযায়ী ফিক্স করার ফাংশন
   const getImageUrl = (url) => {
     if (!url || url.includes('via.placeholder')) {
       return "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600";
     }
-    // যদি ডাটাবেজে http://localhost:5000 সেভ হয়ে থাকে, সেটাকে বর্তমান হোস্টনেমে রূপান্তর করবে
     return url.replace('localhost', window.location.hostname);
   };
 
@@ -113,38 +112,43 @@ function App() {
             <h3 className="text-xl font-bold text-emerald-100">Our Handcrafted Terrariums</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {/* Grid layout - Mobiles: 2 columns, Desktop: 3/4 columns */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {products.map((product) => (
               <div 
                 key={product._id} 
-                className="bg-[#141f1a] border border-emerald-900/40 rounded-2xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
+                className="bg-[#141f1a] border border-emerald-900/40 rounded-xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
               >
                 <div onClick={() => setSelectedProduct(product)}>
-                  <img 
-                    src={getImageUrl(product.imageUrl)} 
-                    alt={product.name} 
-                    className="w-full h-56 object-cover group-hover:scale-105 transition duration-500" 
-                  />
-                  <div className="p-5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-md border border-emerald-800/40">
+                  {/* Image Height Reduced to h-36 on mobile, h-44 on desktop */}
+                  <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
+                    <img 
+                      src={getImageUrl(product.imageUrl)} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                    />
+                  </div>
+                  
+                  <div className="p-3 sm:p-4">
+                    <span className="text-[8px] sm:text-[10px] font-bold tracking-widest uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800/40">
                       {product.category || "Terrarium"}
                     </span>
-                    <h4 className="text-lg font-bold mt-3 text-emerald-50 group-hover:text-emerald-300 transition">{product.name}</h4>
-                    <p className="text-stone-400 text-xs mt-2 leading-relaxed line-clamp-2">{product.description}</p>
+                    <h4 className="text-sm sm:text-base font-bold mt-2 text-emerald-50 group-hover:text-emerald-300 transition line-clamp-1">{product.name}</h4>
+                    <p className="text-stone-400 text-[11px] sm:text-xs mt-1 leading-relaxed line-clamp-2">{product.description}</p>
                   </div>
                 </div>
 
-                <div className="p-5 pt-0 mt-auto flex justify-between items-center border-t border-emerald-900/30">
+                <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center border-t border-emerald-900/30">
                   <div>
-                    <span className="text-xs text-stone-400 block">Price</span>
-                    <span className="text-lg font-bold text-emerald-300">৳ {product.price}</span>
+                    <span className="text-[10px] text-stone-400 block sm:hidden">Price</span>
+                    <span className="text-sm sm:text-base font-bold text-emerald-300">৳ {product.price}</span>
                   </div>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       addToCart(product);
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-4 py-2 rounded-xl text-xs transition active:scale-95 shadow-md shadow-emerald-900/30"
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-3 py-1.5 rounded-lg text-[11px] sm:text-xs transition active:scale-95 shadow-md shadow-emerald-900/30 text-center"
                   >
                     Add to Cart
                   </button>

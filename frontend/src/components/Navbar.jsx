@@ -1,21 +1,54 @@
-import React from 'react';
-import { ShoppingBag } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingBag, MoreVertical, X } from 'lucide-react';
 
 export default function Navbar({ cartCount, onOpenCart }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <nav className="bg-[#f2f1ea] border-b border-[#d8d6c9] sticky top-0 z-40 px-4 py-3 shadow-sm">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+    <nav className="bg-[#f2f1ea] border-b border-[#d8d6c9] sticky top-0 z-40 px-4 py-2.5 shadow-sm">
+      <div className="max-w-6xl mx-auto flex items-center justify-between relative">
         
-        {/* Left Side: Navigation Links (Stacked Vertically) */}
-        <div className="flex flex-col gap-1 text-xs md:text-sm font-semibold tracking-wide text-[#1e2e24]">
-          <a href="#" className="hover:text-[#43644f] transition-colors leading-tight">Home</a>
-          <a href="#" className="hover:text-[#43644f] transition-colors leading-tight">Products</a>
-          <a href="#" className="hover:text-[#43644f] transition-colors leading-tight">Category</a>
+        {/* Left Side: 3-Dot Menu Button & Dropdown */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 rounded-xl bg-[#e5e3d8] border border-[#c4c1b2] hover:bg-[#dad7ca] transition-colors text-[#1f382b] flex items-center justify-center"
+            aria-label="Toggle Menu"
+          >
+            {isMenuOpen ? <X className="w-5 h-5" /> : <MoreVertical className="w-5 h-5" />}
+          </button>
+
+          {/* Dropdown Menu */}
+          {isMenuOpen && (
+            <div className="absolute left-0 mt-2 w-44 bg-[#f2f1ea] border border-[#c4c1b2] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <a 
+                href="#" 
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-semibold text-[#1e2e24] hover:bg-[#e5e3d8] transition-colors"
+              >
+                Home
+              </a>
+              <a 
+                href="#" 
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-semibold text-[#1e2e24] hover:bg-[#e5e3d8] transition-colors"
+              >
+                Products
+              </a>
+              <a 
+                href="#" 
+                onClick={() => setIsMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-semibold text-[#1e2e24] hover:bg-[#e5e3d8] transition-colors"
+              >
+                Category
+              </a>
+            </div>
+          )}
         </div>
 
-        {/* Center/Right: Brand Logo & Custom SVG Leaf */}
+        {/* Center: Perfectly Centered Brand Logo */}
         <div 
-          className="flex flex-col items-center cursor-pointer py-0.5" 
+          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer py-0.5" 
           onClick={() => window.location.href = '/'}
         >
           {/* Custom Leaf Icon */}
@@ -35,34 +68,32 @@ export default function Navbar({ cartCount, onOpenCart }) {
           </div>
 
           {/* Logo Title */}
-          <span className="font-extrabold text-[11px] sm:text-xs md:text-sm tracking-[0.2em] text-[#0f1712] uppercase text-center">
+          <span className="font-extrabold text-[10px] sm:text-xs md:text-sm tracking-[0.2em] text-[#0f1712] uppercase text-center whitespace-nowrap">
             THE MOSS WANDERER
           </span>
 
           {/* Subtitle */}
           <div className="w-full flex items-center justify-center gap-1.5 mt-0.5">
             <span className="h-[1px] bg-[#1f382b] w-3 md:w-4"></span>
-            <span className="text-[7.5px] md:text-[9px] font-bold tracking-[0.18em] text-[#1f382b] uppercase whitespace-nowrap">
+            <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold tracking-[0.18em] text-[#1f382b] uppercase whitespace-nowrap">
               NATURE CONTAINED
             </span>
             <span className="h-[1px] bg-[#1f382b] w-3 md:w-4"></span>
           </div>
         </div>
 
-        {/* Right Side: Cart Icon */}
-        <div className="flex items-center">
-          <button 
-            onClick={onOpenCart}
-            className="relative bg-[#e5e3d8] border border-[#c4c1b2] p-2 md:p-2.5 rounded-xl hover:bg-[#dad7ca] transition-colors"
-          >
-            <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-[#1f382b]" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-[#1f382b] text-[#f2f1ea] font-bold text-[9px] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shadow-md">
-                {cartCount}
-              </span>
-            )}
-          </button>
-        </div>
+        {/* Right Side: Cart Button */}
+        <button 
+          onClick={onOpenCart}
+          className="relative bg-[#e5e3d8] border border-[#c4c1b2] p-2 md:p-2.5 rounded-xl hover:bg-[#dad7ca] transition-colors"
+        >
+          <ShoppingBag className="w-4 h-4 md:w-5 md:h-5 text-[#1f382b]" />
+          {cartCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-[#1f382b] text-[#f2f1ea] font-bold text-[9px] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shadow-md">
+              {cartCount}
+            </span>
+          )}
+        </button>
 
       </div>
     </nav>
