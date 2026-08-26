@@ -5,8 +5,8 @@ export default function Navbar({ cartCount, onOpenCart, onOpenAuth, user, onLogo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-[#f2f1ea] border-b border-[#d8d6c9] sticky top-0 z-40 px-4 py-2.5 shadow-sm">
-      <div className="max-w-6xl mx-auto flex items-center justify-between relative">
+    <nav className="bg-[#f2f1ea] border-b border-[#d8d6c9] sticky top-0 z-40 px-4 py-3 shadow-sm">
+      <div className="max-w-6xl mx-auto flex items-center justify-between relative min-h-[52px]">
         
         {/* Left Side: 3-Dot Menu Button & Dropdown */}
         <div className="relative">
@@ -48,11 +48,11 @@ export default function Navbar({ cartCount, onOpenCart, onOpenAuth, user, onLogo
 
         {/* Center: Perfectly Centered Brand Logo */}
         <div 
-          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer py-0.5" 
+          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer py-1" 
           onClick={() => window.location.href = '/'}
         >
           {/* Custom Leaf Icon */}
-          <div className="w-7 h-7 md:w-8 md:h-8 mb-0.5">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 mb-0.5">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               {/* Left Side - Dark Green */}
               <path d="M50 12 C 22 25, 18 68, 50 88 C 48 60, 46 32, 50 12 Z" fill="#1f382b" />
@@ -68,17 +68,17 @@ export default function Navbar({ cartCount, onOpenCart, onOpenAuth, user, onLogo
           </div>
 
           {/* Logo Title */}
-          <span className="font-extrabold text-[10px] sm:text-xs md:text-sm tracking-[0.2em] text-[#0f1712] uppercase text-center whitespace-nowrap">
+          <span className="font-extrabold text-[10px] sm:text-xs tracking-[0.18em] text-[#0f1712] uppercase text-center whitespace-nowrap leading-none">
             THE MOSS WANDERER
           </span>
 
           {/* Subtitle */}
-          <div className="w-full flex items-center justify-center gap-1.5 mt-0.5">
-            <span className="h-[1px] bg-[#1f382b] w-3 md:w-4"></span>
-            <span className="text-[7px] sm:text-[8px] md:text-[9px] font-bold tracking-[0.18em] text-[#1f382b] uppercase whitespace-nowrap">
+          <div className="w-full flex items-center justify-center gap-1 mt-1">
+            <span className="h-[1px] bg-[#1f382b] w-2.5 sm:w-3"></span>
+            <span className="text-[7px] sm:text-[8px] font-bold tracking-[0.15em] text-[#1f382b] uppercase whitespace-nowrap leading-none">
               NATURE CONTAINED
             </span>
-            <span className="h-[1px] bg-[#1f382b] w-3 md:w-4"></span>
+            <span className="h-[1px] bg-[#1f382b] w-2.5 sm:w-3"></span>
           </div>
         </div>
 
