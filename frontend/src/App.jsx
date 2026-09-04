@@ -23,7 +23,7 @@ function App() {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const whatsappNumber = "8801715985373"; 
+  const whatsappNumber = "8801772818573"; 
   const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
 
   // ডায়নামিক Hostname দিয়ে API Call
