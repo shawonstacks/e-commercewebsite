@@ -76,7 +76,7 @@ function Footer() {
             <ul className="space-y-3 text-xs text-stone-400">
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+880 1715-985372</span>
+                <span>+880 1772-818573</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
