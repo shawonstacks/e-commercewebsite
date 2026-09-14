@@ -7,10 +7,14 @@ import ProductModal from './components/ProductModal';
 import AuthModal from './components/AuthModal';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
-import { Leaf, Sparkles, MessageCircle } from 'lucide-react';
+import { Leaf, Sparkles, MessageCircle, Search, Filter } from 'lucide-react';
 
 function App() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -30,9 +34,16 @@ function App() {
   const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
   useEffect(() => {
+    setLoading(true);
     axios.get(`${API_BASE_URL}/api/products`)
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err));
+      .then(res => {
+        setProducts(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   }, [API_BASE_URL]);
 
   const addToCart = (product) => {
@@ -62,6 +73,17 @@ function App() {
     }
     return url.replace('localhost', window.location.hostname);
   };
+
+  // ক্যাটাগরি ফিল্টারিং ডাটা
+  const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
+
+  // ফিল্টার করা প্রোডাক্ট তালিকা
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   if (window.location.pathname === '/admin') {
     return <AdminPanel onBack={() => window.location.href = '/'} />;
@@ -133,56 +155,114 @@ function App() {
           </p>
         </header>
 
+        {/* Search & Filter Controls */}
+        <section className="max-w-6xl mx-auto px-4 mt-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[#141f1a] p-4 rounded-xl border border-emerald-900/40">
+            {/* Search Input */}
+            <div className="relative w-full md:w-80">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" />
+              <input
+                type="text"
+                placeholder="Search terrariums..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#0d1411] border border-emerald-900/60 rounded-lg pl-9 pr-4 py-2 text-xs sm:text-sm text-emerald-100 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+              <Filter className="w-4 h-4 text-emerald-500 shrink-0 hidden sm:block" />
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
+                    selectedCategory === cat
+                      ? 'bg-emerald-600 text-stone-950 shadow-md shadow-emerald-900/40'
+                      : 'bg-[#0d1411] text-stone-400 hover:text-emerald-300 border border-emerald-900/40'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Products Grid */}
-        <section className="max-w-6xl mx-auto px-4 mt-10">
+        <section className="max-w-6xl mx-auto px-4 mt-8">
           <div className="flex items-center gap-2 mb-6">
             <Leaf className="w-5 h-5 text-emerald-400" />
             <h3 className="text-xl font-bold text-emerald-100">Our Handcrafted Terrariums</h3>
           </div>
 
-          {/* Grid layout - Mobiles: 2 columns, Desktop: 3/4 columns */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            {products.map((product) => (
-              <div 
-                key={product._id} 
-                className="bg-[#141f1a] border border-emerald-900/40 rounded-xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
-              >
-                <div onClick={() => setSelectedProduct(product)}>
-                  <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
-                    <img 
-                      src={getImageUrl(product.imageUrl)} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
-                    />
-                  </div>
-                  
-                  <div className="p-3 sm:p-4">
-                    <span className="text-[8px] sm:text-[10px] font-bold tracking-widest uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800/40">
-                      {product.category || "Terrarium"}
-                    </span>
-                    <h4 className="text-sm sm:text-base font-bold mt-2 text-emerald-50 group-hover:text-emerald-300 transition line-clamp-1">{product.name}</h4>
-                    <p className="text-stone-400 text-[11px] sm:text-xs mt-1 leading-relaxed line-clamp-2">{product.description}</p>
+          {/* Skeleton Loading State */}
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <div key={n} className="bg-[#141f1a] border border-emerald-900/30 rounded-xl overflow-hidden p-3 animate-pulse">
+                  <div className="w-full h-36 sm:h-44 bg-emerald-950/50 rounded-lg mb-3"></div>
+                  <div className="h-3 bg-emerald-950/80 rounded w-1/3 mb-2"></div>
+                  <div className="h-4 bg-emerald-950/80 rounded w-2/3 mb-2"></div>
+                  <div className="h-3 bg-emerald-950/80 rounded w-full mb-4"></div>
+                  <div className="flex justify-between items-center pt-2 border-t border-emerald-900/20">
+                    <div className="h-4 bg-emerald-950/80 rounded w-1/4"></div>
+                    <div className="h-7 bg-emerald-950/80 rounded w-1/3"></div>
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            /* Empty Search Results */
+            <div className="text-center py-12 bg-[#141f1a] rounded-xl border border-emerald-900/30">
+              <p className="text-stone-400 text-sm">No products found matching your search criteria.</p>
+            </div>
+          ) : (
+            /* Grid layout - Mobiles: 2 columns, Desktop: 3/4 columns */
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {filteredProducts.map((product) => (
+                <div 
+                  key={product._id} 
+                  className="bg-[#141f1a] border border-emerald-900/40 rounded-xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
+                >
+                  <div onClick={() => setSelectedProduct(product)}>
+                    <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
+                      <img 
+                        src={getImageUrl(product.imageUrl)} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
+                      />
+                    </div>
+                    
+                    <div className="p-3 sm:p-4">
+                      <span className="text-[8px] sm:text-[10px] font-bold tracking-widest uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800/40">
+                        {product.category || "Terrarium"}
+                      </span>
+                      <h4 className="text-sm sm:text-base font-bold mt-2 text-emerald-50 group-hover:text-emerald-300 transition line-clamp-1">{product.name}</h4>
+                      <p className="text-stone-400 text-[11px] sm:text-xs mt-1 leading-relaxed line-clamp-2">{product.description}</p>
+                    </div>
+                  </div>
 
-                <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center border-t border-emerald-900/30">
-                  <div>
-                    <span className="text-[10px] text-stone-400 block sm:hidden">Price</span>
-                    <span className="text-sm sm:text-base font-bold text-emerald-300">৳ {product.price}</span>
+                  <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center border-t border-emerald-900/30">
+                    <div>
+                      <span className="text-[10px] text-stone-400 block sm:hidden">Price</span>
+                      <span className="text-sm sm:text-base font-bold text-emerald-300">৳ {product.price}</span>
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product);
+                      }}
+                      className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-3 py-1.5 rounded-lg text-[11px] sm:text-xs transition active:scale-95 shadow-md shadow-emerald-900/30 text-center"
+                    >
+                      Add to Cart
+                    </button>
                   </div>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(product);
-                    }}
-                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-3 py-1.5 rounded-lg text-[11px] sm:text-xs transition active:scale-95 shadow-md shadow-emerald-900/30 text-center"
-                  >
-                    Add to Cart
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
