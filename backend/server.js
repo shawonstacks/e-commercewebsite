@@ -6,8 +6,13 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware (Explicit CORS Config)
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Uploads ফোল্ডারটিকে Static করা হলো
@@ -21,13 +26,14 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/moss-wander
 // Routes
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
-const authRoutes = require('./routes/auth'); // Auth Route যুক্ত করা হয়েছে
+const authRoutes = require('./routes/auth');
 
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/auth', authRoutes); // Auth API এ্যান্ডপয়েন্ট সেটিং
+app.use('/api/auth', authRoutes);
 
-const PORT = process.env.PORT || 5000;
+// Fallback Port set to 5001 for Docker consistency
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
