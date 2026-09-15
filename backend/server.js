@@ -13,13 +13,16 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+// Base64 ইমেজ আপলোডের জন্য Body Limit ৫০ মেগাবাইটে বাড়ানো হলো
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Uploads ফোল্ডারটিকে Static করা হলো
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/moss-wanderer')
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://e-commerce-db:27017/moss-wanderer';
+mongoose.connect(MONGO_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch((err) => console.log('MongoDB Connection Error:', err));
 
@@ -32,8 +35,13 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/auth', authRoutes);
 
-// Fallback Port set to 5001 for Docker consistency
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+// Root Health Check Route
+app.get('/', (req, res) => {
+  res.send('Moss Wanderer API is up and running!');
+});
+
+// Port Mismatch Fixed: 5000 port and bind to 0.0.0.0 for Docker
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
