@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
   Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, 
-  LogOut, LayoutDashboard, Package, ShoppingBag, Users, Search, Bell, Plus, Trash2, ArrowLeft, User
+  LogOut, LayoutDashboard, Package, ShoppingBag, Plus, Trash2, ArrowLeft, User 
 } from 'lucide-react';
+
+// API Base URL (পোর্ট 5000 এর সাথে কানেক্টেড)
+const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
 // 1. ADMIN / USER LOGIN & SIGN UP COMPONENT
@@ -16,7 +20,7 @@ function AdminLogin({ onLoginSuccess }) {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
@@ -27,48 +31,55 @@ function AdminLogin({ onLoginSuccess }) {
         return;
       }
 
-      const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const userExists = existingUsers.some((u) => u.phone === phone);
-      
-      if (userExists) {
-        setError('This phone number is already registered!');
-        return;
-      }
-
-      const newUser = { name, phone, password, role: 'user' };
-      existingUsers.push(newUser);
-      localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
-
-      setSuccessMsg('Account created successfully! Signing in...');
-      
-      setTimeout(() => {
+      try {
+        // Sign Up via API
+        await axios.post(`${API_BASE_URL}/api/auth/register`, { name, phone, password });
+        setSuccessMsg('Account created successfully! Signing in...');
+        
+        setTimeout(() => {
+          localStorage.setItem('isAdminAuthenticated', 'true');
+          localStorage.setItem('currentUser', JSON.stringify({ name, phone, role: 'user' }));
+          if (onLoginSuccess) onLoginSuccess();
+          else window.location.reload();
+        }, 1000);
+      } catch (err) {
+        // API না থাকলে লোকাল ফলব্যাক
+        const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        if (existingUsers.some((u) => u.phone === phone)) {
+          setError('This phone number is already registered!');
+          return;
+        }
+        const newUser = { name, phone, password, role: 'user' };
+        existingUsers.push(newUser);
+        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+        
         localStorage.setItem('isAdminAuthenticated', 'true');
         localStorage.setItem('currentUser', JSON.stringify(newUser));
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        } else {
-          window.location.reload();
-        }
-      }, 1000);
+        if (onLoginSuccess) onLoginSuccess();
+        else window.location.reload();
+      }
 
     } else {
+      // Default Admin Check
       const isDefaultAdmin = phone === '01772818573' && password === 'admin';
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const foundUser = registeredUsers.find((u) => u.phone === phone && u.password === password);
 
-      if (isDefaultAdmin || foundUser) {
+      if (isDefaultAdmin) {
         localStorage.setItem('isAdminAuthenticated', 'true');
-        localStorage.setItem(
-          'currentUser',
-          JSON.stringify(foundUser || { name: 'Admin', phone: '01772818573', role: 'admin' })
-        );
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        } else {
-          window.location.reload();
-        }
+        localStorage.setItem('currentUser', JSON.stringify({ name: 'Admin', phone: '01772818573', role: 'admin' }));
+        if (onLoginSuccess) onLoginSuccess();
+        else window.location.reload();
       } else {
-        setError('Invalid phone number or password!');
+        try {
+          const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { phone, password });
+          if (res.data) {
+            localStorage.setItem('isAdminAuthenticated', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(res.data.user || { name: 'User', phone }));
+            if (onLoginSuccess) onLoginSuccess();
+            else window.location.reload();
+          }
+        } catch (err) {
+          setError('Invalid phone number or password!');
+        }
       }
     }
   };
@@ -208,11 +219,12 @@ function AdminLogin({ onLoginSuccess }) {
 // ==========================================
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('products'); // Default to products view as requested
+  const [activeTab, setActiveTab] = useState('products');
 
-  // States for products and orders
+  // Backend Data States
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Form states for adding product
   const [productName, setProductName] = useState('');
@@ -221,31 +233,29 @@ export default function AdminPanel() {
   const [productDescription, setProductDescription] = useState('');
   const [productImage, setProductImage] = useState('');
 
+  // 1. Fetch Products & Orders from Node.js Backend API
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [prodRes, orderRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/products`),
+        axios.get(`${API_BASE_URL}/api/orders`)
+      ]);
+      setProducts(prodRes.data || []);
+      setOrders(orderRes.data || []);
+    } catch (err) {
+      console.error('Error fetching data from API:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const auth = localStorage.getItem('isAdminAuthenticated');
     if (auth === 'true') {
       setIsAuthenticated(true);
+      fetchData();
     }
-
-    // Load initial data from localStorage
-    const savedProducts = JSON.parse(localStorage.getItem('products') || '[]');
-    const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    
-    // Default mock products if empty
-    if (savedProducts.length === 0) {
-      const initialProducts = [
-        { id: 1, name: 'Geometric Form', price: 2500, category: 'Terrarium', image: 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=300' },
-        { id: 2, name: 'Mini Ecosystem Terrarium', price: 2000, category: 'Terrarium', image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=300' },
-        { id: 3, name: 'Terrarium Glass', price: 3000, category: 'Terrarium', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300' },
-        { id: 4, name: 'Mini Ecosystem-2', price: 2000, category: 'Terrarium', image: 'https://images.unsplash.com/photo-1512428559087-560fa5ceab42?w=300' },
-      ];
-      localStorage.setItem('products', JSON.stringify(initialProducts));
-      setProducts(initialProducts);
-    } else {
-      setProducts(savedProducts);
-    }
-
-    setOrders(savedOrders);
   }, []);
 
   const handleLogout = () => {
@@ -265,13 +275,12 @@ export default function AdminPanel() {
     }
   };
 
-  // Add Product Handler
-  const handleAddProduct = (e) => {
+  // 2. Add Product directly to MongoDB via Backend API
+  const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!productName || !productPrice) return;
 
     const newProd = {
-      id: Date.now(),
       name: productName,
       price: Number(productPrice),
       category: productCategory,
@@ -279,33 +288,49 @@ export default function AdminPanel() {
       image: productImage || 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=300'
     };
 
-    const updated = [newProd, ...products];
-    setProducts(updated);
-    localStorage.setItem('products', JSON.stringify(updated));
+    try {
+      setLoading(true);
+      await axios.post(`${API_BASE_URL}/api/products`, newProd);
+      alert('Product added successfully to database!');
 
-    // Reset Form
-    setProductName('');
-    setProductPrice('');
-    setProductDescription('');
-    setProductImage('');
-    alert('Product added successfully!');
+      // Reset Form
+      setProductName('');
+      setProductPrice('');
+      setProductDescription('');
+      setProductImage('');
+
+      // Refresh product list from API
+      fetchData();
+    } catch (err) {
+      console.error('Error adding product:', err);
+      alert('Failed to save product to database. Check if backend container is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Delete Product Handler
-  const handleDeleteProduct = (id) => {
+  // 3. Delete Product from MongoDB via Backend API
+  const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      const updated = products.filter(p => p.id !== id);
-      setProducts(updated);
-      localStorage.setItem('products', JSON.stringify(updated));
+      try {
+        setLoading(true);
+        await axios.delete(`${API_BASE_URL}/api/products/${id}`);
+        fetchData();
+      } catch (err) {
+        console.error('Error deleting product:', err);
+        alert('Failed to delete product.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const totalOrdersCount = orders.length;
   const activeProductsCount = products.length;
-  const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount || order.total) || 0), 0);
 
   if (!isAuthenticated) {
-    return <AdminLogin onLoginSuccess={() => setIsAuthenticated(true)} />;
+    return <AdminLogin onLoginSuccess={() => { setIsAuthenticated(true); fetchData(); }} />;
   }
 
   return (
@@ -323,7 +348,7 @@ export default function AdminPanel() {
           </button>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setActiveTab('orders')}
+              onClick={() => { setActiveTab('orders'); fetchData(); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
                 activeTab === 'orders'
                   ? 'bg-emerald-600 text-stone-950'
@@ -334,7 +359,7 @@ export default function AdminPanel() {
               Customer Orders ({totalOrdersCount})
             </button>
             <button
-              onClick={() => setActiveTab('products')}
+              onClick={() => { setActiveTab('products'); fetchData(); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
                 activeTab === 'products'
                   ? 'bg-emerald-600 text-stone-950'
@@ -345,7 +370,7 @@ export default function AdminPanel() {
               Manage Products ({activeProductsCount})
             </button>
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); fetchData(); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
                 activeTab === 'dashboard'
                   ? 'bg-emerald-600 text-stone-950'
@@ -373,7 +398,9 @@ export default function AdminPanel() {
       {/* Main Content Body */}
       <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
         
-        {/* VIEW 1: MANAGE PRODUCTS (Matching your design screenshot) */}
+        {loading && <div className="text-xs text-emerald-400 mb-4 text-center animate-pulse">Syncing with server database...</div>}
+
+        {/* VIEW 1: MANAGE PRODUCTS */}
         {activeTab === 'products' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
@@ -444,10 +471,11 @@ export default function AdminPanel() {
 
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10"
+                  disabled={loading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 disabled:opacity-50"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Product</span>
+                  <span>{loading ? 'Saving to Database...' : 'Add Product'}</span>
                 </button>
               </form>
             </div>
@@ -458,27 +486,31 @@ export default function AdminPanel() {
               
               <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                 {products.length === 0 ? (
-                  <p className="text-xs text-stone-500 text-center py-8">No products added yet.</p>
+                  <p className="text-xs text-stone-500 text-center py-8">No products added in database yet.</p>
                 ) : (
                   products.map((item) => (
                     <div 
-                      key={item.id}
+                      key={item._id || item.id}
                       className="bg-[#121f19] border border-emerald-900/30 p-3 rounded-xl flex items-center justify-between gap-4 transition hover:border-emerald-800/50"
                     >
                       <div className="flex items-center gap-3">
                         <img 
-                          src={item.image} 
+                          src={
+                            item.image 
+                              ? (item.image.startsWith('http') || item.image.startsWith('data:') ? item.image : `${API_BASE_URL}${item.image}`)
+                              : 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=300'
+                          } 
                           alt={item.name} 
                           className="w-12 h-12 object-cover rounded-lg border border-emerald-900/50"
                         />
                         <div>
                           <h4 className="text-xs font-bold text-stone-200">{item.name}</h4>
-                          <p className="text-[11px] text-stone-400">৳ {item.price} • {item.category}</p>
+                          <p className="text-[11px] text-stone-400">৳ {item.price} • {item.category || 'Terrarium'}</p>
                         </div>
                       </div>
 
                       <button
-                        onClick={() => handleDeleteProduct(item.id)}
+                        onClick={() => handleDeleteProduct(item._id || item.id)}
                         className="text-stone-500 hover:text-red-400 p-2 rounded-lg transition"
                         title="Delete Product"
                       >
@@ -500,19 +532,20 @@ export default function AdminPanel() {
             
             {orders.length === 0 ? (
               <div className="text-center py-12 text-stone-500 text-xs">
-                No customer orders received yet.
+                No customer orders received in database yet.
               </div>
             ) : (
               <div className="space-y-3">
                 {orders.map((ord, idx) => (
-                  <div key={idx} className="bg-[#121f19] border border-emerald-900/30 p-4 rounded-xl flex items-center justify-between text-xs">
+                  <div key={ord._id || idx} className="bg-[#121f19] border border-emerald-900/30 p-4 rounded-xl flex items-center justify-between text-xs">
                     <div>
-                      <p className="font-bold text-emerald-400">Order #{ord.id || idx + 1}</p>
+                      <p className="font-bold text-emerald-400">Order #{ord._id ? ord._id.slice(-6) : ord.id || idx + 1}</p>
                       <p className="text-stone-300">Customer: {ord.customerName || 'Guest'}</p>
                       <p className="text-stone-400">Phone: {ord.phone || 'N/A'}</p>
+                      <p className="text-stone-500 text-[10px]">Address: {ord.address || 'N/A'}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-stone-100">৳ {ord.total || 0}</p>
+                      <p className="font-bold text-stone-100">৳ {ord.totalAmount || ord.total || 0}</p>
                       <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full">
                         {ord.status || 'Pending'}
                       </span>
