@@ -226,6 +226,7 @@ export default function AdminPanel() {
   const [productCategory, setProductCategory] = useState('Terrarium');
   const [productDescription, setProductDescription] = useState('');
   const [productImage, setProductImage] = useState('');
+  const [productFile, setProductFile] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -259,6 +260,7 @@ export default function AdminPanel() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setProductFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProductImage(reader.result);
@@ -274,28 +276,36 @@ export default function AdminPanel() {
       return;
     }
 
-    if (!productImage) {
+    if (!productFile && !productImage) {
       alert('Please select an image file for the product!');
       return;
     }
 
-    const newProd = {
-      name: productName,
-      price: Number(productPrice),
-      category: productCategory,
-      description: productDescription,
-      image: productImage
-    };
+    const formData = new FormData();
+    formData.append('name', productName);
+    formData.append('price', Number(productPrice));
+    formData.append('category', productCategory);
+    formData.append('description', productDescription || '');
+    formData.append('stock', '0');
+
+    if (productFile) {
+      formData.append('image', productFile);
+    } else if (productImage) {
+      formData.append('image', productImage);
+    }
 
     try {
       setLoading(true);
-      await axios.post(`${API_BASE_URL}/api/products`, newProd);
+      await axios.post(`${API_BASE_URL}/api/products`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       alert('Product added successfully to database!');
 
       setProductName('');
       setProductPrice('');
       setProductDescription('');
       setProductImage('');
+      setProductFile(null);
       e.target.reset();
 
       fetchData();
