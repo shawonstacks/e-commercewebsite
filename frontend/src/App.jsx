@@ -59,12 +59,21 @@ function App() {
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // ইমেজ URL সার্ভারের IP/Domain অনুযায়ী ফিক্স করার ফাংশন
-  const getImageUrl = (url) => {
-    if (!url || url.includes('via.placeholder')) {
-      return "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600";
+  // 🛠️ FIX 1 & 2: ইমেজ URL বা Base64 হ্যান্ডেল করার সঠিক ফাংশন
+  const getImageUrl = (product) => {
+    // Admin panel e 'image' or 'imageUrl' dutooi thakte pare
+    const imgPath = product.image || product.imageUrl;
+
+    if (!imgPath || imgPath.includes('via.placeholder') || imgPath.includes('unsplash.com')) {
+      return "https://via.placeholder.com/400x300?text=Terrarium+Image";
     }
-    return url.replace('localhost', window.location.hostname);
+
+    // Base64 ইমেজ হলে সরাসরি রিটার্ন করবে
+    if (imgPath.startsWith('data:image')) {
+      return imgPath;
+    }
+
+    return imgPath.replace('localhost', window.location.hostname);
   };
 
   // সার্চ এবং ক্যাটাগরি ফিল্টারিং লজিক
@@ -144,7 +153,7 @@ function App() {
           </p>
         </header>
 
-        {/* Search & Filter Section (Added from Screenshot) */}
+        {/* Search & Filter Section */}
         <div className="max-w-6xl mx-auto px-4 mb-8">
           <div className="bg-[#121c18] border border-emerald-900/40 p-3 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg">
             
@@ -197,9 +206,13 @@ function App() {
               >
                 <div onClick={() => setSelectedProduct(product)}>
                   <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
+                    {/* 🛠️ FIX 3: getImageUrl(product) পাস করা হয়েছে এবং onError দিয়ে ব্রোকেন লিংক হ্যান্ডেল করা হয়েছে */}
                     <img 
-                      src={getImageUrl(product.imageUrl)} 
+                      src={getImageUrl(product)} 
                       alt={product.name} 
+                      onError={(e) => {
+                        e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                     />
                   </div>
