@@ -1,199 +1,255 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Search, Filter, ShoppingCart, Leaf, Shield, ArrowLeft } from 'lucide-react';
+import Navbar from './components/Navbar';
+import CartDrawer from './components/CartDrawer';
+import CheckoutModal from './components/CheckoutModal';
+import ProductModal from './components/ProductModal';
+import AuthModal from './components/AuthModal';
 import AdminPanel from './components/AdminPanel';
+import Footer from './components/Footer';
+import { Leaf, Sparkles, MessageCircle, Search, Filter } from 'lucide-react';
 
-const API_BASE_URL = `http://${window.location.hostname}:5000`;
-
-// Safe Image Resolver Utility
-const getImageSrc = (image) => {
-  if (!image || typeof image !== 'string' || image.trim() === '') {
-    return 'https://via.placeholder.com/400x400?text=No+Image+Available';
-  }
-  if (!image.startsWith('data:image') && !image.startsWith('http') && !image.startsWith('/uploads')) {
-    return `data:image/jpeg;base64,${image}`;
-  }
-  if (image.startsWith('/uploads')) {
-    return `${API_BASE_URL}${image}`;
-  }
-  return image;
-};
-
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('store'); // 'store' or 'admin'
+function App() {
   const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Filter & Search States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [loading, setLoading] = useState(true);
 
-  // URL Path Check (E.g. if user types /admin in address bar)
+  // Auth States
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('userData');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const whatsappNumber = "8801772818573"; 
+  const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
+
+  // ডায়নামিক Hostname দিয়ে API Call
+  const API_BASE_URL = `http://${window.location.hostname}:5000`;
+
   useEffect(() => {
-    if (window.location.pathname === '/admin') {
-      setCurrentPage('admin');
-    }
-  }, []);
+    axios.get(`${API_BASE_URL}/api/products`)
+      .then(res => setProducts(res.data))
+      .catch(err => console.error(err));
+  }, [API_BASE_URL]);
 
-  useEffect(() => {
-    if (currentPage === 'store') {
-      fetchProducts();
+  const addToCart = (product) => {
+    const existing = cart.find(item => item._id === product._id);
+    if (existing) {
+      setCart(cart.map(item => 
+        item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+      ));
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
     }
-  }, [currentPage]);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/products`);
-      setProducts(res.data || []);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-    } finally {
-      setLoading(false);
-    }
+    setIsCartOpen(true);
   };
 
-  const filteredProducts = products.filter((prod) => {
-    const matchesSearch = prod.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || prod.category === selectedCategory;
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userData');
+    setUser(null);
+  };
+
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // 🛠️ FIX 1 & 2: ইমেজ URL বা Base64 হ্যান্ডেল করার সঠিক ফাংশন
+  const getImageUrl = (product) => {
+    // Admin panel e 'image' or 'imageUrl' dutooi thakte pare
+    const imgPath = product.image || product.imageUrl;
+
+    if (!imgPath || imgPath.includes('via.placeholder') || imgPath.includes('unsplash.com')) {
+      return "https://via.placeholder.com/400x300?text=Terrarium+Image";
+    }
+
+    // Base64 ইমেজ হলে সরাসরি রিটার্ন করবে
+    if (imgPath.startsWith('data:image')) {
+      return imgPath;
+    }
+
+    return imgPath.replace('localhost', window.location.hostname);
+  };
+
+  // সার্চ এবং ক্যাটাগরি ফিল্টারিং লজিক
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || (product.category && product.category.toLowerCase() === selectedCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
-  // If page state is Admin, Render AdminPanel Component
-  if (currentPage === 'admin') {
-    return (
-      <div>
-        <div className="bg-[#0a120e] px-6 py-2 border-b border-emerald-950/60 flex items-center justify-between">
-          <button
-            onClick={() => {
-              window.history.pushState({}, '', '/');
-              setCurrentPage('store');
-            }}
-            className="text-emerald-400 text-xs font-bold flex items-center gap-1.5 hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4" /> Go to Customer Store
-          </button>
-        </div>
-        <AdminPanel />
-      </div>
-    );
+  if (window.location.pathname === '/admin') {
+    return <AdminPanel onBack={() => window.location.href = '/'} />;
   }
 
-  // Render Customer Store Page
   return (
-    <div className="min-h-screen bg-[#070d0a] text-stone-100 font-sans p-6 md:p-10 relative">
-      
-      {/* Top Floating Admin Switch Button */}
-      <div className="max-w-7xl mx-auto flex justify-end mb-4">
-        <button
-          onClick={() => {
-            window.history.pushState({}, '', '/admin');
-            setCurrentPage('admin');
-          }}
-          className="bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 hover:bg-emerald-900 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition"
-        >
-          <Shield className="w-4 h-4" />
-          <span>Admin Panel</span>
-        </button>
-      </div>
-
-      {/* Hero Header */}
-      <div className="max-w-7xl mx-auto text-center space-y-3 mb-10">
-        <h1 className="text-4xl md:text-5xl font-black text-stone-100 tracking-tight">
-          Nature, Curated for Your Space.
-        </h1>
-        <p className="text-stone-400 text-sm max-w-xl mx-auto">
-          Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.
-        </p>
-      </div>
-
-      {/* Filter & Search Controls */}
-      <div className="max-w-7xl mx-auto bg-[#0d1612] border border-emerald-950/80 rounded-2xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div className="min-h-screen bg-[#0d1411] text-stone-200 font-sans relative flex flex-col justify-between">
+      <div>
+        {/* Navbar with Auth Props */}
+        <Navbar 
+          cartCount={totalCartCount} 
+          onOpenCart={() => setIsCartOpen(true)} 
+          onOpenAuth={() => setIsAuthOpen(true)}
+          user={user}
+          onLogout={handleLogout}
+        />
         
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-stone-500 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            placeholder="Search terrariums..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#121f19] border border-emerald-900/40 rounded-xl pl-10 pr-4 py-2.5 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500"
-          />
-        </div>
+        <CartDrawer 
+          isOpen={isCartOpen} 
+          onClose={() => setIsCartOpen(false)} 
+          cart={cart} 
+          setCart={setCart} 
+          onCheckout={() => setIsCheckoutOpen(true)}
+        />
 
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
-          <Filter className="w-4 h-4 text-emerald-500 mr-2 hidden md:block" />
-          {['All', 'Terrarium', 'Moss Art', 'Plants', 'Accessories'].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                selectedCategory === cat
-                  ? 'bg-emerald-500 text-stone-950 font-bold'
-                  : 'bg-[#121f19] text-stone-400 border border-emerald-900/30 hover:text-stone-200'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
+        <CheckoutModal 
+          isOpen={isCheckoutOpen} 
+          onClose={() => setIsCheckoutOpen(false)} 
+          cart={cart} 
+          setCart={setCart} 
+        />
 
-      {/* Product Display Section */}
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex items-center gap-2">
-          <Leaf className="w-5 h-5 text-emerald-400" />
-          <h2 className="text-xl font-bold text-stone-100">Our Handcrafted Terrariums</h2>
-        </div>
+        <ProductModal 
+          product={selectedProduct} 
+          onClose={() => setSelectedProduct(null)} 
+          onAddToCart={addToCart} 
+        />
 
-        {loading ? (
-          <div className="text-center py-20 text-emerald-500 text-xs animate-pulse">
-            Loading collection...
+        {/* Customer Auth Login Modal */}
+        <AuthModal 
+          isOpen={isAuthOpen} 
+          onClose={() => setIsAuthOpen(false)} 
+          onLoginSuccess={(userData) => setUser(userData)} 
+        />
+
+        {/* Floating WhatsApp Button */}
+        <a 
+          href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-40 bg-emerald-500 hover:bg-emerald-400 text-stone-950 p-3.5 rounded-full shadow-2xl transition duration-300 flex items-center gap-2 text-xs font-bold active:scale-95 group"
+          title="Chat with us on WhatsApp"
+        >
+          <MessageCircle className="w-6 h-6 fill-stone-950" />
+          <span className="hidden group-hover:inline-block pr-1">Chat with Us</span>
+        </a>
+
+        {/* Banner Section */}
+        <header className="relative my-6 text-center max-w-4xl mx-auto px-4 py-8 rounded-2xl bg-gradient-to-b from-[#182620] to-[#0d1411] border border-emerald-900/40">
+          <div className="inline-flex items-center gap-2 bg-emerald-950/80 text-emerald-300 text-xs px-3 py-1 rounded-full border border-emerald-800/50 mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            Tiny Worlds of Green
           </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-20 text-stone-500 text-xs bg-[#0d1612] rounded-2xl border border-emerald-950/80">
-            No products found matching your criteria.
+          <h2 className="text-3xl md:text-5xl font-black text-emerald-50 tracking-tight">
+            Nature, Curated for Your Space.
+          </h2>
+          <p className="text-stone-400 text-sm md:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
+            Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.
+          </p>
+        </header>
+
+        {/* Search & Filter Section */}
+        <div className="max-w-6xl mx-auto px-4 mb-8">
+          <div className="bg-[#121c18] border border-emerald-900/40 p-3 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg">
+            
+            {/* Search Input */}
+            <div className="relative w-full md:w-80">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search terrariums..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-[#0d1411] border border-emerald-900/50 rounded-xl text-stone-200 text-xs focus:outline-none focus:border-emerald-500 placeholder-stone-500"
+              />
+            </div>
+
+            {/* Category Buttons */}
+            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+              <Filter className="w-4 h-4 text-emerald-500 mr-1" />
+              {['All', 'Terrarium', 'Moss Art'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
+                    selectedCategory === cat
+                      ? 'bg-emerald-500 text-stone-950 font-bold'
+                      : 'bg-[#182620] text-stone-300 hover:bg-emerald-900/40 border border-emerald-900/30'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((item) => (
-              <div
-                key={item._id || item.id}
-                className="bg-[#0f1a14] border border-emerald-950/80 hover:border-emerald-800/60 rounded-2xl p-4 flex flex-col justify-between transition duration-300 group"
+        </div>
+
+        {/* Products Grid */}
+        <section className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center gap-2 mb-6">
+            <Leaf className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-xl font-bold text-emerald-100">Our Handcrafted Terrariums</h3>
+          </div>
+
+          {/* Grid layout - Mobiles: 2 columns, Desktop: 3/4 columns */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {filteredProducts.map((product) => (
+              <div 
+                key={product._id} 
+                className="bg-[#141f1a] border border-emerald-900/40 rounded-xl overflow-hidden hover:border-emerald-600/50 transition duration-300 flex flex-col justify-between cursor-pointer group"
               >
-                <div>
-                  <div className="w-full h-56 bg-[#080e0a] rounded-xl overflow-hidden mb-4 relative">
-                    <img
-                      src={getImageSrc(item.image || item.imageUrl)}
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                <div onClick={() => setSelectedProduct(product)}>
+                  <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
+                    {/* 🛠️ FIX 3: getImageUrl(product) পাস করা হয়েছে এবং onError দিয়ে ব্রোকেন লিংক হ্যান্ডেল করা হয়েছে */}
+                    <img 
+                      src={getImageUrl(product)} 
+                      alt={product.name} 
                       onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/400x400?text=Image+Load+Error';
+                        e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
                       }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                     />
-                    <span className="absolute bottom-2 left-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-stone-950/90 border border-emerald-900/80 px-2 py-0.5 rounded-md">
-                      {item.category || 'Terrarium'}
-                    </span>
                   </div>
-
-                  <h3 className="text-sm font-bold text-stone-100 line-clamp-1 mb-1">{item.name}</h3>
-                  <p className="text-xs text-stone-400 line-clamp-2 mb-4">
-                    {item.description || 'Custom crafted botanical design.'}
-                  </p>
+                  
+                  <div className="p-3 sm:p-4">
+                    <span className="text-[8px] sm:text-[10px] font-bold tracking-widest uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800/40">
+                      {product.category || "Terrarium"}
+                    </span>
+                    <h4 className="text-sm sm:text-base font-bold mt-2 text-emerald-50 group-hover:text-emerald-300 transition line-clamp-1">{product.name}</h4>
+                    <p className="text-stone-400 text-[11px] sm:text-xs mt-1 leading-relaxed line-clamp-2">{product.description}</p>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-emerald-950/60">
-                  <span className="text-base font-black text-emerald-400">৳ {item.price}</span>
-                  <button className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 p-2.5 rounded-xl transition flex items-center gap-1.5 text-xs font-bold">
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Add</span>
+                <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center border-t border-emerald-900/30">
+                  <div>
+                    <span className="text-[10px] text-stone-400 block sm:hidden">Price</span>
+                    <span className="text-sm sm:text-base font-bold text-emerald-300">৳ {product.price}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(product);
+                    }}
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-bold px-3 py-1.5 rounded-lg text-[11px] sm:text-xs transition active:scale-95 shadow-md shadow-emerald-900/30 text-center"
+                  >
+                    Add to Cart
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        )}
+        </section>
       </div>
 
+      <Footer />
     </div>
   );
 }
+
+export default App;
