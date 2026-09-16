@@ -5,19 +5,36 @@ const Order = require('../models/Order');
 // ১. নতুন অর্ডার তৈরি করা
 router.post('/', async (req, res) => {
   try {
-    const { customerName, customerEmail, shippingAddress, items, totalAmount, totalCost } = req.body;
+    const { 
+      customerName, name, 
+      customerEmail, email, 
+      shippingAddress, address, phone,
+      items, 
+      totalAmount, total, 
+      totalCost 
+    } = req.body;
+
+    // items থেকে অটোমেটিক খরচ ও রেভিনিউ হিসাব (যদি ফ্রন্টএন্ড না পাঠায়)
+    let calculatedCost = totalCost || 0;
+    if (!calculatedCost && Array.isArray(items)) {
+      calculatedCost = items.reduce((acc, item) => acc + ((item.costPrice || 0) * (item.quantity || 1)), 0);
+    }
+
     const newOrder = new Order({
-      customerName,
-      customerEmail,
-      shippingAddress,
-      items,
-      totalAmount,
-      totalCost
+      customerName: customerName || name || 'Guest Customer',
+      customerEmail: customerEmail || email || 'no-email@provided.com',
+      shippingAddress: shippingAddress || address || phone || 'Address Not Provided',
+      phone: phone || '',
+      items: items || [],
+      totalAmount: Number(totalAmount || total || 0),
+      totalCost: Number(calculatedCost)
     });
-    await newOrder.save();
-    res.status(201).json(newOrder);
+
+    const savedOrder = await newOrder.save();
+    res.status(201).json(savedOrder);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating order', error });
+    console.error('Order Creation Failed:', error);
+    res.status(500).json({ message: 'Error creating order', error: error.message });
   }
 });
 
@@ -27,11 +44,11 @@ router.get('/', async (req, res) => {
     const orders = await Order.find().sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders', error });
+    res.status(500).json({ message: 'Error fetching orders', error: error.message });
   }
 });
 
-// ৩. অর্ডারের স্ট্যাটাস পরিবর্তন করা (Confirm / Cancel / Deliver)
+// ৩. অর্ডারের স্ট্যাটাস পরিবর্তন করা
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
@@ -42,11 +59,11 @@ router.patch('/:id/status', async (req, res) => {
     );
     res.json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating order status', error });
+    res.status(500).json({ message: 'Error updating order status', error: error.message });
   }
 });
 
-// ৪. রেভিনিউ ও প্রফিট অ্যানালিটিক্স পাওয়া
+// ৪. অ্যানালিটিক্স
 router.get('/analytics/stats', async (req, res) => {
   try {
     const orders = await Order.find({ status: { $ne: 'cancelled' } });
@@ -57,24 +74,22 @@ router.get('/analytics/stats', async (req, res) => {
     let confirmedOrders = 0;
 
     orders.forEach(order => {
-      totalRevenue += order.totalAmount || 0;
-      totalCost += order.totalCost || 0;
+      totalRevenue += Number(order.totalAmount || 0);
+      totalCost += Number(order.totalCost || 0);
       if (order.status === 'pending') pendingOrders++;
       if (order.status === 'confirmed') confirmedOrders++;
     });
-
-    const netProfit = totalRevenue - totalCost;
 
     res.json({
       totalSalesCount: orders.length,
       totalRevenue,
       totalCost,
-      netProfit,
+      netProfit: totalRevenue - totalCost,
       pendingOrders,
       confirmedOrders
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching analytics', error });
+    res.status(500).json({ message: 'Error fetching analytics', error: error.message });
   }
 });
 
