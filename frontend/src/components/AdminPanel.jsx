@@ -263,7 +263,7 @@ export default function AdminPanel() {
     setIsAuthenticated(false);
   };
 
-  // Image Upload Handler
+  // Image Upload Handler (Converts File to Base64)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -278,14 +278,22 @@ export default function AdminPanel() {
   // 2. Add Product directly to MongoDB via Backend API
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    if (!productName || !productPrice) return;
+    if (!productName || !productPrice) {
+      alert('Please enter Product Name and Price!');
+      return;
+    }
+
+    if (!productImage) {
+      alert('Please select an image file for the product!');
+      return;
+    }
 
     const newProd = {
       name: productName,
       price: Number(productPrice),
       category: productCategory,
       description: productDescription,
-      image: productImage || 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=300'
+      image: productImage
     };
 
     try {
@@ -298,12 +306,13 @@ export default function AdminPanel() {
       setProductPrice('');
       setProductDescription('');
       setProductImage('');
+      e.target.reset();
 
       // Refresh product list from API
       fetchData();
     } catch (err) {
       console.error('Error adding product:', err);
-      alert('Failed to save product to database. Check if backend container is running.');
+      alert('Failed to save product to database. Check server logs/payload limit.');
     } finally {
       setLoading(false);
     }
@@ -453,9 +462,16 @@ export default function AdminPanel() {
                   <input
                     type="file"
                     accept="image/*"
+                    required
                     onChange={handleImageChange}
-                    className="w-full text-xs text-stone-400 bg-[#121f19] border border-emerald-900/50 rounded-xl p-2 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-stone-950 hover:file:bg-emerald-500"
+                    className="w-full text-xs text-stone-400 bg-[#121f19] border border-emerald-900/50 rounded-xl p-2 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-stone-950 hover:file:bg-emerald-500 cursor-pointer"
                   />
+                  {productImage && (
+                    <div className="mt-2.5 flex items-center gap-3 bg-[#121f19] p-2 rounded-xl border border-emerald-900/40">
+                      <img src={productImage} alt="Selected Preview" className="w-12 h-12 object-cover rounded-lg border border-emerald-500/50" />
+                      <span className="text-[11px] text-emerald-400 font-medium">Image Selected Ready!</span>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -495,11 +511,7 @@ export default function AdminPanel() {
                     >
                       <div className="flex items-center gap-3">
                         <img 
-                          src={
-                            item.image 
-                              ? (item.image.startsWith('http') || item.image.startsWith('data:') ? item.image : `${API_BASE_URL}${item.image}`)
-                              : 'https://images.unsplash.com/photo-1545241047-6083a3684587?w=300'
-                          } 
+                          src={item.image} 
                           alt={item.name} 
                           className="w-12 h-12 object-cover rounded-lg border border-emerald-900/50"
                         />
@@ -542,7 +554,7 @@ export default function AdminPanel() {
                       <p className="font-bold text-emerald-400">Order #{ord._id ? ord._id.slice(-6) : ord.id || idx + 1}</p>
                       <p className="text-stone-300">Customer: {ord.customerName || 'Guest'}</p>
                       <p className="text-stone-400">Phone: {ord.phone || 'N/A'}</p>
-                      <p className="text-stone-500 text-[10px]">Address: {ord.address || 'N/A'}</p>
+                      <p className="text-stone-500 text-[10px]">Address: {ord.shippingAddress || ord.address || 'N/A'}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-stone-100">৳ {ord.totalAmount || ord.total || 0}</p>
