@@ -5,7 +5,6 @@ import {
   LogOut, LayoutDashboard, Package, ShoppingBag, Plus, Trash2, ArrowLeft, User 
 } from 'lucide-react';
 
-// API Base URL (পোর্ট 5000 এর সাথে কানেক্টেড)
 const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
@@ -32,7 +31,6 @@ function AdminLogin({ onLoginSuccess }) {
       }
 
       try {
-        // Sign Up via API
         await axios.post(`${API_BASE_URL}/api/auth/register`, { name, phone, password });
         setSuccessMsg('Account created successfully! Signing in...');
         
@@ -43,7 +41,6 @@ function AdminLogin({ onLoginSuccess }) {
           else window.location.reload();
         }, 1000);
       } catch (err) {
-        // API না থাকলে লোকাল ফলব্যাক
         const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
         if (existingUsers.some((u) => u.phone === phone)) {
           setError('This phone number is already registered!');
@@ -60,7 +57,6 @@ function AdminLogin({ onLoginSuccess }) {
       }
 
     } else {
-      // Default Admin Check
       const isDefaultAdmin = phone === '01772818573' && password === 'admin';
 
       if (isDefaultAdmin) {
@@ -221,19 +217,16 @@ export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
 
-  // Backend Data States
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Form states for adding product
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [productCategory, setProductCategory] = useState('Terrarium');
   const [productDescription, setProductDescription] = useState('');
   const [productImage, setProductImage] = useState('');
 
-  // 1. Fetch Products & Orders from Node.js Backend API
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -263,7 +256,6 @@ export default function AdminPanel() {
     setIsAuthenticated(false);
   };
 
-  // Image Upload Handler (Converts File to Base64)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -275,7 +267,6 @@ export default function AdminPanel() {
     }
   };
 
-  // 2. Add Product directly to MongoDB via Backend API
   const handleAddProduct = async (e) => {
     e.preventDefault();
     if (!productName || !productPrice) {
@@ -301,24 +292,21 @@ export default function AdminPanel() {
       await axios.post(`${API_BASE_URL}/api/products`, newProd);
       alert('Product added successfully to database!');
 
-      // Reset Form
       setProductName('');
       setProductPrice('');
       setProductDescription('');
       setProductImage('');
       e.target.reset();
 
-      // Refresh product list from API
       fetchData();
     } catch (err) {
       console.error('Error adding product:', err);
-      alert('Failed to save product to database. Check server logs/payload limit.');
+      alert('Failed to save product to database. Check payload limit or server connection.');
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Delete Product from MongoDB via Backend API
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
@@ -332,6 +320,14 @@ export default function AdminPanel() {
         setLoading(false);
       }
     }
+  };
+
+  // Safe Image Helper
+  const getImageSrc = (imgData) => {
+    if (!imgData || typeof imgData !== 'string' || imgData.trim() === '') {
+      return "https://via.placeholder.com/150?text=No+Image";
+    }
+    return imgData;
   };
 
   const totalOrdersCount = orders.length;
@@ -413,7 +409,7 @@ export default function AdminPanel() {
         {activeTab === 'products' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left Form: Add New Product */}
+            {/* Form: Add New Product */}
             <div className="lg:col-span-5 bg-[#0d1612] border border-emerald-900/40 rounded-2xl p-6 shadow-xl">
               <h3 className="text-lg font-bold text-stone-100 mb-5">Add New Product</h3>
               
@@ -468,8 +464,8 @@ export default function AdminPanel() {
                   />
                   {productImage && (
                     <div className="mt-2.5 flex items-center gap-3 bg-[#121f19] p-2 rounded-xl border border-emerald-900/40">
-                      <img src={productImage} alt="Selected Preview" className="w-12 h-12 object-cover rounded-lg border border-emerald-500/50" />
-                      <span className="text-[11px] text-emerald-400 font-medium">Image Selected Ready!</span>
+                      <img src={productImage} alt="Preview" className="w-12 h-12 object-cover rounded-lg border border-emerald-500/50" />
+                      <span className="text-[11px] text-emerald-400 font-medium">Image Ready!</span>
                     </div>
                   )}
                 </div>
@@ -496,7 +492,7 @@ export default function AdminPanel() {
               </form>
             </div>
 
-            {/* Right Side: Product List */}
+            {/* Product List */}
             <div className="lg:col-span-7 bg-[#0d1612] border border-emerald-900/40 rounded-2xl p-6 shadow-xl space-y-4">
               <h3 className="text-lg font-bold text-stone-100">All Products ({products.length})</h3>
               
@@ -511,9 +507,13 @@ export default function AdminPanel() {
                     >
                       <div className="flex items-center gap-3">
                         <img 
-                          src={item.image} 
+                          src={getImageSrc(item.image || item.imageUrl)} 
                           alt={item.name} 
                           className="w-12 h-12 object-cover rounded-lg border border-emerald-900/50"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://via.placeholder.com/150?text=Error";
+                          }}
                         />
                         <div>
                           <h4 className="text-xs font-bold text-stone-200">{item.name}</h4>

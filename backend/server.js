@@ -13,11 +13,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Base64 ইমেজ আপলোডের জন্য Body Limit ৫০ মেগাবাইটে বাড়ানো হলো
+// Base64 ইমেজের পেলোড সাইজ ৫০ মেগাবাইটে বাড়ানো হলো
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Uploads ফোল্ডারটিকে Static করা হলো
+// Static Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
   res.send('Moss Wanderer API is up and running!');
 });
 
-// Port Mismatch Fixed: 5000 port and bind to 0.0.0.0 for Docker
+// Server Listener
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
