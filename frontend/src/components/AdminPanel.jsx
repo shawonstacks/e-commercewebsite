@@ -226,7 +226,6 @@ export default function AdminPanel() {
   const [productCategory, setProductCategory] = useState('Terrarium');
   const [productDescription, setProductDescription] = useState('');
   const [productImage, setProductImage] = useState('');
-  const [productFile, setProductFile] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -257,10 +256,10 @@ export default function AdminPanel() {
     setIsAuthenticated(false);
   };
 
+  // FileReader to handle direct Base64 Encoding for fast & unlimited size payload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProductFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setProductImage(reader.result);
@@ -276,42 +275,39 @@ export default function AdminPanel() {
       return;
     }
 
-    if (!productFile && !productImage) {
-      alert('Please select an image file for the product!');
+    if (!productImage) {
+      alert('Please select an image for the product!');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('name', productName);
-    formData.append('price', Number(productPrice));
-    formData.append('category', productCategory);
-    formData.append('description', productDescription || '');
-    formData.append('stock', '0');
-
-    if (productFile) {
-      formData.append('image', productFile);
-    } else if (productImage) {
-      formData.append('image', productImage);
-    }
+    // Direct JSON Payload for MongoDB Base64 Storage
+    const newProductPayload = {
+      name: productName,
+      price: Number(productPrice),
+      category: productCategory,
+      description: productDescription || '',
+      stock: 0,
+      image: productImage,
+      imageUrl: productImage
+    };
 
     try {
       setLoading(true);
-      await axios.post(`${API_BASE_URL}/api/products`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      await axios.post(`${API_BASE_URL}/api/products`, newProductPayload, {
+        headers: { 'Content-Type': 'application/json' }
       });
-      alert('Product added successfully to database!');
+      alert('Product added successfully!');
 
       setProductName('');
       setProductPrice('');
       setProductDescription('');
       setProductImage('');
-      setProductFile(null);
       e.target.reset();
 
       fetchData();
     } catch (err) {
       console.error('Error adding product:', err);
-      alert('Failed to save product to database. Check payload limit or server connection.');
+      alert('Failed to save product to database.');
     } finally {
       setLoading(false);
     }
@@ -332,7 +328,7 @@ export default function AdminPanel() {
     }
   };
 
-  // Safe Image Helper
+  // Safe Image Resolver
   const getImageSrc = (imgData) => {
     if (!imgData || typeof imgData !== 'string' || imgData.trim() === '') {
       return "https://via.placeholder.com/150?text=No+Image";

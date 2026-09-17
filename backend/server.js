@@ -6,16 +6,16 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware (Explicit CORS Config)
+// Middleware (Explicit CORS Config with Allowed Headers)
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With']
 }));
 
-// Base64 ইমেজের পেলোড সাইজ ৫০ মেগাবাইটে বাড়ানো হলো
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Base64 ইমেজের পেলোড সাইজ ৫০০ মেগাবাইটে বাড়ানো হলো (Unlimited/High Capacity Support)
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
 // Static Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
