@@ -238,7 +238,7 @@ export default function AdminPanel() {
       setOrders(orderRes.data || []);
     } catch (err) {
       console.error('Error fetching data from API:', err);
-    } fontally {
+    } finally {
       setLoading(false);
     }
   };
