@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
       totalCost 
     } = req.body;
 
-    // items থেকে অটোমেটিক খরচ ও রেভিনিউ হিসাব (যদি ফ্রন্টএন্ড না পাঠায়)
+    // items থেকে অটোমেটিক খরচ ও রেভিনিউ হিসাব (যদি ফ্রন্টএন্ড না পাঠায়)
     let calculatedCost = totalCost || 0;
     if (!calculatedCost && Array.isArray(items)) {
       calculatedCost = items.reduce((acc, item) => acc + ((item.costPrice || 0) * (item.quantity || 1)), 0);
@@ -27,7 +27,8 @@ router.post('/', async (req, res) => {
       phone: phone || '',
       items: items || [],
       totalAmount: Number(totalAmount || total || 0),
-      totalCost: Number(calculatedCost)
+      totalCost: Number(calculatedCost),
+      status: 'pending' // ডিফল্ট স্ট্যাটাস ছোট হাতের অক্ষরে রাখা ভালো
     });
 
     const savedOrder = await newOrder.save();
@@ -38,7 +39,45 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ২. সকল অর্ডার পাওয়া (Admin)
+// ২. অ্যানালিটিক্স (Dynamic/Parametric Route এর আগে রাখা নিরাপদ)
+router.get('/analytics/stats', async (req, res) => {
+  try {
+    // Case Insensitive সার্চের জন্য RegExp অথবা Lowercase ফিল্টারিং
+    const orders = await Order.find();
+    
+    let totalRevenue = 0;
+    let totalCost = 0;
+    let pendingOrders = 0;
+    let confirmedOrders = 0;
+    let validSalesCount = 0;
+
+    orders.forEach(order => {
+      const currentStatus = (order.status || '').toLowerCase();
+
+      if (currentStatus !== 'cancelled') {
+        totalRevenue += Number(order.totalAmount || 0);
+        totalCost += Number(order.totalCost || 0);
+        validSalesCount++;
+      }
+
+      if (currentStatus === 'pending') pendingOrders++;
+      if (currentStatus === 'confirmed' || currentStatus === 'completed') confirmedOrders++;
+    });
+
+    res.json({
+      totalSalesCount: validSalesCount,
+      totalRevenue,
+      totalCost,
+      netProfit: totalRevenue - totalCost,
+      pendingOrders,
+      confirmedOrders
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching analytics', error: error.message });
+  }
+});
+
+// ৩. সকল অর্ডার পাওয়া (Admin)
 router.get('/', async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
@@ -48,7 +87,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ৩. অর্ডারের স্ট্যাটাস পরিবর্তন করা
+// ৪. অর্ডারের স্ট্যাটাস পরিবর্তন করা (একবারই রাখা হয়েছে)
 router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
@@ -57,39 +96,14 @@ router.patch('/:id/status', async (req, res) => {
       { status },
       { new: true }
     );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     res.json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: 'Error updating order status', error: error.message });
-  }
-});
-
-// ৪. অ্যানালিটিক্স
-router.get('/analytics/stats', async (req, res) => {
-  try {
-    const orders = await Order.find({ status: { $ne: 'cancelled' } });
-    
-    let totalRevenue = 0;
-    let totalCost = 0;
-    let pendingOrders = 0;
-    let confirmedOrders = 0;
-
-    orders.forEach(order => {
-      totalRevenue += Number(order.totalAmount || 0);
-      totalCost += Number(order.totalCost || 0);
-      if (order.status === 'pending') pendingOrders++;
-      if (order.status === 'confirmed') confirmedOrders++;
-    });
-
-    res.json({
-      totalSalesCount: orders.length,
-      totalRevenue,
-      totalCost,
-      netProfit: totalRevenue - totalCost,
-      pendingOrders,
-      confirmedOrders
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching analytics', error: error.message });
   }
 });
 

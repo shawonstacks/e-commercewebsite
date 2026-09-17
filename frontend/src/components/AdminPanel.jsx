@@ -238,7 +238,7 @@ export default function AdminPanel() {
       setOrders(orderRes.data || []);
     } catch (err) {
       console.error('Error fetching data from API:', err);
-    } finally {
+    } fontally {
       setLoading(false);
     }
   };
@@ -313,7 +313,6 @@ export default function AdminPanel() {
 
   // STRICT DATABASE DELETION HANDLER
   const handleDeleteProduct = async (product) => {
-    // Prioritize MongoDB _id
     const targetId = product._id || product.id;
 
     if (!targetId) {
@@ -324,12 +323,9 @@ export default function AdminPanel() {
     if (window.confirm(`Are you sure you want to permanently delete "${product.name}"?`)) {
       try {
         setLoading(true);
-        
-        // Send explicit delete request to backend database
         const res = await axios.delete(`${API_BASE_URL}/api/products/${targetId}`);
         
         if (res.status === 200 || res.status === 204) {
-          // Re-fetch fresh data directly from MongoDB server to synchronize UI
           await fetchData();
           alert('Product permanently deleted from database!');
         } else {
@@ -341,6 +337,20 @@ export default function AdminPanel() {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  // ORDER STATUS UPDATE HANDLER
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      setLoading(true);
+      await axios.patch(`${API_BASE_URL}/api/orders/${orderId}/status`, { status: newStatus });
+      await fetchData();
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      alert('Failed to update order status');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -573,15 +583,25 @@ export default function AdminPanel() {
                   <div key={ord._id || idx} className="bg-[#121f19] border border-emerald-900/30 p-4 rounded-xl flex items-center justify-between text-xs">
                     <div>
                       <p className="font-bold text-emerald-400">Order #{ord._id ? ord._id.slice(-6) : ord.id || idx + 1}</p>
-                      <p className="text-stone-300">Customer: {ord.customerName || 'Guest'}</p>
+                      <p className="text-stone-300">Customer: {ord.customerName || ord.name || 'Guest'}</p>
                       <p className="text-stone-400">Phone: {ord.phone || 'N/A'}</p>
                       <p className="text-stone-500 text-[10px]">Address: {ord.shippingAddress || ord.address || 'N/A'}</p>
                     </div>
-                    <div className="text-right">
+                    
+                    <div className="text-right space-y-2">
                       <p className="font-bold text-stone-100">৳ {ord.totalAmount || ord.total || 0}</p>
-                      <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full">
-                        {ord.status || 'Pending'}
-                      </span>
+                      
+                      {/* Dynamic Status Dropdown */}
+                      <select
+                        value={ord.status || 'Pending'}
+                        onChange={(e) => handleStatusChange(ord._id, e.target.value)}
+                        className="bg-[#0a120e] text-xs font-semibold px-2 py-1 rounded-lg border border-emerald-800 text-emerald-400 focus:outline-none cursor-pointer"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
                     </div>
                   </div>
                 ))}
