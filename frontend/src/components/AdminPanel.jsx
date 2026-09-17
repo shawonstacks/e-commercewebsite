@@ -311,30 +311,33 @@ export default function AdminPanel() {
     }
   };
 
-  // UPDATED FIX FOR PRODUCT DELETION ISSUE
+  // STRICT DATABASE DELETION HANDLER
   const handleDeleteProduct = async (product) => {
+    // Prioritize MongoDB _id
     const targetId = product._id || product.id;
 
     if (!targetId) {
-      alert('Product ID not found!');
+      alert('Error: Product Database ID not found!');
       return;
     }
 
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
+    if (window.confirm(`Are you sure you want to permanently delete "${product.name}"?`)) {
       try {
         setLoading(true);
         
-        // Attempt deletion in Backend API
-        await axios.delete(`${API_BASE_URL}/api/products/${targetId}`);
+        // Send explicit delete request to backend database
+        const res = await axios.delete(`${API_BASE_URL}/api/products/${targetId}`);
         
-        // Update State locally for fast UI response
-        setProducts((prev) => prev.filter((p) => (p._id || p.id) !== targetId));
-        alert('Product deleted successfully!');
+        if (res.status === 200 || res.status === 204) {
+          // Re-fetch fresh data directly from MongoDB server to synchronize UI
+          await fetchData();
+          alert('Product permanently deleted from database!');
+        } else {
+          alert('Backend failed to delete the product.');
+        }
       } catch (err) {
         console.error('Error deleting product from server:', err);
-        
-        // Fallback: If backend returns error, remove from Local State to prevent blockage
-        setProducts((prev) => prev.filter((p) => (p._id || p.id) !== targetId));
+        alert(`Failed to delete product from database: ${err.response?.data?.message || err.message}`);
       } finally {
         setLoading(false);
       }

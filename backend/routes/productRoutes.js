@@ -67,4 +67,28 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
+// =========================================================
+// ADDED: DELETE PRODUCT BY ID (ডাটাবেজ থেকে ডিলেট করার রাউট)
+// =========================================================
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // MongoDB _id দিয়ে প্রোডাক্ট খুঁজে মুছে ফেলা
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: 'Product not found in database' });
+    }
+
+    res.status(200).json({ 
+      message: 'Product deleted successfully', 
+      id: deletedProduct._id 
+    });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ message: 'Error deleting product', error: error.message });
+  }
+});
+
 module.exports = router;
