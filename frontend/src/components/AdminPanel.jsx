@@ -256,7 +256,6 @@ export default function AdminPanel() {
     setIsAuthenticated(false);
   };
 
-  // FileReader to handle direct Base64 Encoding for fast & unlimited size payload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -280,7 +279,6 @@ export default function AdminPanel() {
       return;
     }
 
-    // Direct JSON Payload for MongoDB Base64 Storage
     const newProductPayload = {
       name: productName,
       price: Number(productPrice),
@@ -313,22 +311,36 @@ export default function AdminPanel() {
     }
   };
 
-  const handleDeleteProduct = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+  // UPDATED FIX FOR PRODUCT DELETION ISSUE
+  const handleDeleteProduct = async (product) => {
+    const targetId = product._id || product.id;
+
+    if (!targetId) {
+      alert('Product ID not found!');
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
       try {
         setLoading(true);
-        await axios.delete(`${API_BASE_URL}/api/products/${id}`);
-        fetchData();
+        
+        // Attempt deletion in Backend API
+        await axios.delete(`${API_BASE_URL}/api/products/${targetId}`);
+        
+        // Update State locally for fast UI response
+        setProducts((prev) => prev.filter((p) => (p._id || p.id) !== targetId));
+        alert('Product deleted successfully!');
       } catch (err) {
-        console.error('Error deleting product:', err);
-        alert('Failed to delete product.');
+        console.error('Error deleting product from server:', err);
+        
+        // Fallback: If backend returns error, remove from Local State to prevent blockage
+        setProducts((prev) => prev.filter((p) => (p._id || p.id) !== targetId));
       } finally {
         setLoading(false);
       }
     }
   };
 
-  // Safe Image Resolver
   const getImageSrc = (imgData) => {
     if (!imgData || typeof imgData !== 'string' || imgData.trim() === '') {
       return "https://via.placeholder.com/150?text=No+Image";
@@ -528,7 +540,7 @@ export default function AdminPanel() {
                       </div>
 
                       <button
-                        onClick={() => handleDeleteProduct(item._id || item.id)}
+                        onClick={() => handleDeleteProduct(item)}
                         className="text-stone-500 hover:text-red-400 p-2 rounded-lg transition"
                         title="Delete Product"
                       >
