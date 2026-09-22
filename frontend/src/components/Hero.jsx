@@ -10,17 +10,33 @@ export default function Hero() {
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
-  // Auto Slider (Every 3 Seconds)
+  // Auto Slider (Every 4 Seconds)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImgIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(timer);
   }, [heroImages.length]);
 
   return (
     <div className="relative w-full max-w-6xl mx-auto my-6 rounded-3xl overflow-hidden border border-[#0d3829] shadow-2xl bg-[#091a13]">
       
+      {/* Standard Speed Infinite Marquee CSS */}
+      <style>{`
+        @keyframes marqueeSmooth {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-container {
+          display: flex;
+          width: max-content;
+          animation: marqueeSmooth 35s linear infinite;
+        }
+        .marquee-container:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
       {/* 1. BACKGROUND IMAGE SLIDER */}
       <div className="absolute inset-0 z-0">
         {heroImages.map((img, idx) => (
@@ -53,10 +69,15 @@ export default function Hero() {
           Nature, Curated for Your Space.
         </h1>
 
-        {/* MARQUEE TEXT (Right to Left Motion) */}
-        <div className="w-full overflow-hidden whitespace-nowrap py-2 border-y border-emerald-900/40 bg-[#050B08]/50 backdrop-blur-md rounded-xl">
-          <div className="inline-block animate-marquee text-emerald-300 font-medium text-sm md:text-base">
-            Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.
+        {/* MARQUEE TEXT (Smooth & Standard Speed) */}
+        <div className="w-full overflow-hidden whitespace-nowrap py-2.5 border-y border-emerald-900/40 bg-[#050B08]/60 backdrop-blur-md rounded-xl">
+          <div className="marquee-container text-emerald-300 font-medium text-sm md:text-base">
+            <span className="px-4">
+              Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.&nbsp;&nbsp;&nbsp;✦
+            </span>
+            <span className="px-4">
+              Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.&nbsp;&nbsp;&nbsp;✦
+            </span>
           </div>
         </div>
 
