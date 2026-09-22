@@ -8,7 +8,7 @@ import {
 const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
-// 1. ADMIN / USER LOGIN & SIGN UP COMPONENT
+// 1. ADMIN / USER LOGIN & SIGN UP COMPONENT (DARK THEME MATCHED)
 // ==========================================
 function AdminLogin({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -81,44 +81,44 @@ function AdminLogin({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#fcfbfa] text-stone-800 flex items-center justify-center p-6 font-sans">
+    <div className="min-h-screen w-full bg-[#070d0a] text-stone-100 flex items-center justify-center p-6 font-sans">
       <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase">
+          <div className="inline-flex items-center gap-2 bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase">
             <ShieldCheck className="w-4 h-4" />
             The Moss Wanderer Portal
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-black text-stone-900 leading-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-stone-100 leading-tight">
             {isSignUp ? "Create an account and get started with us." : "Sign in with phone number and continue where you left off."}
           </h1>
           
-          <p className="text-stone-500 text-sm leading-relaxed">
+          <p className="text-stone-400 text-sm leading-relaxed">
             {isSignUp
               ? "Register your account to manage orders, explore custom terrariums, and enjoy exclusive botanical features."
               : "Secure access allows you to manage products, monitor orders, and control store inventory seamlessly."}
           </p>
         </div>
 
-        <div className="bg-white border border-stone-200/80 rounded-3xl p-8 md:p-10 shadow-xl shadow-stone-200/50">
+        <div className="bg-[#0d1612] border border-emerald-900/40 rounded-3xl p-8 md:p-10 shadow-2xl shadow-emerald-950/40">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-stone-900 mb-1">
+            <h2 className="text-2xl font-bold text-stone-100 mb-1">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-400">
               {isSignUp ? 'Fill in your details to sign up' : 'Sign in with your phone number and password'}
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl text-center font-medium">
+            <div className="mb-4 p-3 bg-red-950/50 border border-red-800/60 text-red-300 text-xs rounded-xl text-center font-medium">
               {error}
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs rounded-xl text-center font-medium">
+            <div className="mb-4 p-3 bg-emerald-950/50 border border-emerald-800/60 text-emerald-300 text-xs rounded-xl text-center font-medium">
               {successMsg}
             </div>
           )}
@@ -126,52 +126,52 @@ function AdminLogin({ onLoginSuccess }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">Full Name</label>
+                <label className="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">Full Name</label>
                 <div className="relative flex items-center">
-                  <User className="w-4 h-4 text-stone-400 absolute left-3.5" />
+                  <User className="w-4 h-4 text-stone-500 absolute left-3.5" />
                   <input
                     type="text"
                     required
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                    className="w-full pl-10 pr-4 py-3 bg-[#121f19] border border-emerald-900/50 rounded-xl text-sm text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">Phone Number</label>
+              <label className="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">Phone Number</label>
               <div className="relative flex items-center">
-                <Phone className="w-4 h-4 text-stone-400 absolute left-3.5" />
+                <Phone className="w-4 h-4 text-stone-500 absolute left-3.5" />
                 <input
                   type="text"
                   required
                   placeholder="Enter your phone number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                  className="w-full pl-10 pr-4 py-3 bg-[#121f19] border border-emerald-900/50 rounded-xl text-sm text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-1.5">Password</label>
+              <label className="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-1.5">Password</label>
               <div className="relative flex items-center">
-                <Lock className="w-4 h-4 text-stone-400 absolute left-3.5" />
+                <Lock className="w-4 h-4 text-stone-500 absolute left-3.5" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                  className="w-full pl-10 pr-10 py-3 bg-[#121f19] border border-emerald-900/50 rounded-xl text-sm text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 text-stone-400 hover:text-stone-600"
+                  className="absolute right-3.5 text-stone-500 hover:text-stone-300"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -180,7 +180,7 @@ function AdminLogin({ onLoginSuccess }) {
 
             <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition duration-200 mt-2"
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition duration-200 mt-2"
             >
               <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -188,7 +188,7 @@ function AdminLogin({ onLoginSuccess }) {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-400">
               {isSignUp ? "Already have an account?" : "Don't have an account?"}{' '}
               <button
                 type="button"
@@ -197,7 +197,7 @@ function AdminLogin({ onLoginSuccess }) {
                   setError('');
                   setSuccessMsg('');
                 }}
-                className="text-emerald-600 font-bold hover:underline ml-1"
+                className="text-emerald-400 font-bold hover:underline ml-1"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
@@ -580,7 +580,7 @@ export default function AdminPanel() {
             ) : (
               <div className="space-y-3">
                 {orders.map((ord, idx) => (
-                  <div key={ord._id || idx} className="bg-[#121f19] border border-emerald-900/30 p-4 rounded-xl flex items-center justify-between text-xs">
+                  <div key={ord._id || ord.id || idx} className="bg-[#121f19] border border-emerald-900/30 p-4 rounded-xl flex items-center justify-between text-xs">
                     <div>
                       <p className="font-bold text-emerald-400">Order #{ord._id ? ord._id.slice(-6) : ord.id || idx + 1}</p>
                       <p className="text-stone-300">Customer: {ord.customerName || ord.name || 'Guest'}</p>
@@ -594,7 +594,7 @@ export default function AdminPanel() {
                       {/* Dynamic Status Dropdown */}
                       <select
                         value={ord.status || 'Pending'}
-                        onChange={(e) => handleStatusChange(ord._id, e.target.value)}
+                        onChange={(e) => handleStatusChange(ord._id || ord.id, e.target.value)}
                         className="bg-[#0a120e] text-xs font-semibold px-2 py-1 rounded-lg border border-emerald-800 text-emerald-400 focus:outline-none cursor-pointer"
                       >
                         <option value="Pending">Pending</option>

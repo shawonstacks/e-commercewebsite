@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Hero from './components/Hero';
 import axios from 'axios';
 import Navbar from './components/Navbar';
 import CartDrawer from './components/CartDrawer';
@@ -7,7 +8,7 @@ import ProductModal from './components/ProductModal';
 import AuthModal from './components/AuthModal';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
-import { Leaf, Sparkles, MessageCircle, Search, Filter } from 'lucide-react';
+import { Leaf, MessageCircle, Search, Filter } from 'lucide-react';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -30,7 +31,7 @@ function App() {
   const whatsappNumber = "8801772818573"; 
   const whatsappMessage = encodeURIComponent("Hello! I want to know more about your Moss Terrariums.");
 
-  // ডায়নামিক Hostname দিয়ে API Call
+  // Dynamic Hostname for API Call
   const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
   useEffect(() => {
@@ -59,16 +60,14 @@ function App() {
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // 🛠️ FIX 1 & 2: ইমেজ URL বা Base64 হ্যান্ডেল করার সঠিক ফাংশন
+  // Image URL/Base64 handling
   const getImageUrl = (product) => {
-    // Admin panel e 'image' or 'imageUrl' dutooi thakte pare
     const imgPath = product.image || product.imageUrl;
 
     if (!imgPath || imgPath.includes('via.placeholder') || imgPath.includes('unsplash.com')) {
       return "https://via.placeholder.com/400x300?text=Terrarium+Image";
     }
 
-    // Base64 ইমেজ হলে সরাসরি রিটার্ন করবে
     if (imgPath.startsWith('data:image')) {
       return imgPath;
     }
@@ -76,7 +75,7 @@ function App() {
     return imgPath.replace('localhost', window.location.hostname);
   };
 
-  // সার্চ এবং ক্যাটাগরি ফিল্টারিং লজিক
+  // Search and Category Filtering Logic
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || (product.category && product.category.toLowerCase() === selectedCategory.toLowerCase());
@@ -139,19 +138,8 @@ function App() {
           <span className="hidden group-hover:inline-block pr-1">Chat with Us</span>
         </a>
 
-        {/* Banner Section */}
-        <header className="relative my-6 text-center max-w-4xl mx-auto px-4 py-8 rounded-2xl bg-gradient-to-b from-[#182620] to-[#0d1411] border border-emerald-900/40">
-          <div className="inline-flex items-center gap-2 bg-emerald-950/80 text-emerald-300 text-xs px-3 py-1 rounded-full border border-emerald-800/50 mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            Tiny Worlds of Green
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black text-emerald-50 tracking-tight">
-            Nature, Curated for Your Space.
-          </h2>
-          <p className="text-stone-400 text-sm md:text-base mt-3 max-w-2xl mx-auto leading-relaxed">
-            Terrariums, Moss Art & Miniature Gardens crafted to bring a slice of living nature right into your home.
-          </p>
-        </header>
+        {/* New Hero Section Component */}
+        <Hero />
 
         {/* Search & Filter Section */}
         <div className="max-w-6xl mx-auto px-4 mb-8">
@@ -197,7 +185,6 @@ function App() {
             <h3 className="text-xl font-bold text-emerald-100">Our Handcrafted Terrariums</h3>
           </div>
 
-          {/* Grid layout - Mobiles: 2 columns, Desktop: 3/4 columns */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {filteredProducts.map((product) => (
               <div 
@@ -206,7 +193,6 @@ function App() {
               >
                 <div onClick={() => setSelectedProduct(product)}>
                   <div className="w-full h-36 sm:h-44 overflow-hidden bg-[#0d1411]">
-                    {/* 🛠️ FIX 3: getImageUrl(product) পাস করা হয়েছে এবং onError দিয়ে ব্রোকেন লিংক হ্যান্ডেল করা হয়েছে */}
                     <img 
                       src={getImageUrl(product)} 
                       alt={product.name} 
