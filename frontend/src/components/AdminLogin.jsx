@@ -1,27 +1,48 @@
 import React, { useState } from 'react';
 import { Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from 'lucide-react';
+import axios from 'axios';
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Backend API URL (Apnar host/IP onusare adjust korun)
+  const API_BASE_URL = `http://${window.location.hostname}:5000`;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // এখানে আপনার এডমিন ইউজারনেম ও পাসওয়ার্ড দিয়ে যাচাই করুন
-    // উদাহরণ: Phone: 01772818573, Password: admin
-    if (phone === '01772818573' && password === 'admin') {
-      localStorage.setItem('isAdminAuthenticated', 'true');
-      if (onLoginSuccess) {
-        onLoginSuccess();
+    try {
+      // Backend Admin Login API hit
+      const response = await axios.post(`${API_BASE_URL}/api/auth/admin-login`, {
+        phone,
+        password,
+      });
+
+      // Role check and token store
+      if (response.data && response.data.user && response.data.user.role === 'admin') {
+        localStorage.setItem('adminToken', response.data.token || 'true');
+        localStorage.setItem('isAdminAuthenticated', 'true');
+
+        if (onLoginSuccess) {
+          onLoginSuccess(response.data.user);
+        } else {
+          window.location.reload();
+        }
       } else {
-        window.location.reload();
+        setError('Access denied: You do not have admin permissions.');
       }
-    } else {
-      setError('Invalid phone number or password!');
+    } catch (err) {
+      setError(
+        err.response?.data?.message || 'Invalid phone number or password!'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,9 +126,10 @@ export default function AdminLogin({ onLoginSuccess }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition duration-200"
+              disabled={loading}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition duration-200 cursor-pointer"
             >
-              <span>Sign In</span>
+              <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

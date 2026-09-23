@@ -1,44 +1,46 @@
-const express = require('express');
-const router = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'moss_secret_key_123';
-
-// Register
-router.post('/register', async (req, res) => {
+// 1. REGISTER ROUTE (Hamesha customer hobe)
+app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: 'User already exists' });
+    const { phone, password } = req.body;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ phone });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = new User({ name, email, password: hashedPassword });
-    await user.save();
+    // Force role to 'customer'
+    const newUser = new User({
+      phone,
+      password, // Note: Production-e bcrypt.hash use kora ucchit
+      role: 'customer'
+    });
 
-    const token = jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    await newUser.save();
+    res.status(201).json({ message: "Account created successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Login
-router.post('/login', async (req, res) => {
+// 2. ADMIN LOGIN ROUTE (Only Admin Allowed)
+app.post('/api/auth/admin-login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    const { phone, password } = req.body;
+    const user = await User.findOne({ phone });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ message: "Invalid phone or password" });
+    }
 
-    const token = jwt.sign({ id: user._id, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    // CHECK ADMIN ROLE HERE
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: "Access Denied: You are not an Admin!" });
+    }
+
+    res.json({
+      token: "your-jwt-token-here",
+      user: { id: user._id, phone: user.phone, role: user.role }
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
-
-module.exports = router;
