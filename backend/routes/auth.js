@@ -1,17 +1,19 @@
-// 1. REGISTER ROUTE (Hamesha customer hobe)
-app.post('/api/auth/register', async (req, res) => {
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User'); // আপনার User Model এর সঠিক পাথ মিলিয়ে নেবেন
+
+// 1. REGISTER ROUTE
+router.post('/register', async (req, res) => {
   try {
     const { phone, password } = req.body;
     
-    // Check if user exists
     const existingUser = await User.findOne({ phone });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-    // Force role to 'customer'
     const newUser = new User({
       phone,
-      password, // Note: Production-e bcrypt.hash use kora ucchit
-      role: 'customer'
+      password,
+      role: 'customer' // By default customer
     });
 
     await newUser.save();
@@ -21,8 +23,8 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// 2. ADMIN LOGIN ROUTE (Only Admin Allowed)
-app.post('/api/auth/admin-login', async (req, res) => {
+// 2. ADMIN LOGIN ROUTE
+router.post('/admin-login', async (req, res) => {
   try {
     const { phone, password } = req.body;
     const user = await User.findOne({ phone });
@@ -31,16 +33,17 @@ app.post('/api/auth/admin-login', async (req, res) => {
       return res.status(401).json({ message: "Invalid phone or password" });
     }
 
-    // CHECK ADMIN ROLE HERE
     if (user.role !== 'admin') {
       return res.status(403).json({ message: "Access Denied: You are not an Admin!" });
     }
 
     res.json({
-      token: "your-jwt-token-here",
+      token: "admin-secret-token",
       user: { id: user._id, phone: user.phone, role: user.role }
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+module.exports = router;
