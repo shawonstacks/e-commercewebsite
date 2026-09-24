@@ -8,7 +8,7 @@ import {
 const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
-// 1. ADMIN / USER LOGIN & SIGN UP COMPONENT (DARK THEME MATCHED)
+// 1. ADMIN / USER LOGIN COMPONENT (SECURED)
 // ==========================================
 function AdminLogin({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -32,31 +32,19 @@ function AdminLogin({ onLoginSuccess }) {
 
       try {
         await axios.post(`${API_BASE_URL}/api/auth/register`, { name, phone, password });
-        setSuccessMsg('Account created successfully! Signing in...');
+        setSuccessMsg('Customer account created! Note: Admin access requires admin role privileges.');
         
+        // কাস্টমার একাউন্ট তৈরি হলে তাকে অ্যাডমিন এক্সেস দেওয়া হবে না
         setTimeout(() => {
-          localStorage.setItem('isAdminAuthenticated', 'true');
-          localStorage.setItem('currentUser', JSON.stringify({ name, phone, role: 'user' }));
-          if (onLoginSuccess) onLoginSuccess();
-          else window.location.reload();
-        }, 1000);
+          setIsSignUp(false);
+          setSuccessMsg('Please sign in with Admin credentials.');
+        }, 1500);
       } catch (err) {
-        const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-        if (existingUsers.some((u) => u.phone === phone)) {
-          setError('This phone number is already registered!');
-          return;
-        }
-        const newUser = { name, phone, password, role: 'user' };
-        existingUsers.push(newUser);
-        localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
-        
-        localStorage.setItem('isAdminAuthenticated', 'true');
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-        if (onLoginSuccess) onLoginSuccess();
-        else window.location.reload();
+        setError(err.response?.data?.message || 'Registration failed!');
       }
 
     } else {
+      // Hardcoded default admin override (যদি ব্যাকএন্ড ডাটাবেজে না থাকে)
       const isDefaultAdmin = phone === '01772818573' && password === 'admin';
 
       if (isDefaultAdmin) {
@@ -66,15 +54,23 @@ function AdminLogin({ onLoginSuccess }) {
         else window.location.reload();
       } else {
         try {
-          const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { phone, password });
-          if (res.data) {
+          // STRICT ADMIN LOGIN ROUTE CALL
+          const res = await axios.post(`${API_BASE_URL}/api/auth/admin-login`, { phone, password });
+          
+          if (res.data && res.data.user) {
+            // Role Verify Check
+            if (res.data.user.role !== 'admin') {
+              setError('Access Denied: You are not authorized as an Admin!');
+              return;
+            }
+
             localStorage.setItem('isAdminAuthenticated', 'true');
-            localStorage.setItem('currentUser', JSON.stringify(res.data.user || { name: 'User', phone }));
+            localStorage.setItem('currentUser', JSON.stringify(res.data.user));
             if (onLoginSuccess) onLoginSuccess();
             else window.location.reload();
           }
         } catch (err) {
-          setError('Invalid phone number or password!');
+          setError(err.response?.data?.message || 'Invalid admin credentials or unauthorized!');
         }
       }
     }
@@ -91,23 +87,23 @@ function AdminLogin({ onLoginSuccess }) {
           </div>
           
           <h1 className="text-4xl md:text-5xl font-black text-stone-100 leading-tight">
-            {isSignUp ? "Create an account and get started with us." : "Sign in with phone number and continue where you left off."}
+            {isSignUp ? "Create account (Customer Registration)." : "Sign in to access Admin Control Panel."}
           </h1>
           
           <p className="text-stone-400 text-sm leading-relaxed">
             {isSignUp
-              ? "Register your account to manage orders, explore custom terrariums, and enjoy exclusive botanical features."
-              : "Secure access allows you to manage products, monitor orders, and control store inventory seamlessly."}
+              ? "Registering here will create a standard customer account."
+              : "Secure access allows authorized administrators to manage products, monitor customer orders, and control store inventory."}
           </p>
         </div>
 
         <div className="bg-[#0d1612] border border-emerald-900/40 rounded-3xl p-8 md:p-10 shadow-2xl shadow-emerald-950/40">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-stone-100 mb-1">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
+              {isSignUp ? 'Create Customer Account' : 'Admin Portal Login'}
             </h2>
             <p className="text-xs text-stone-400">
-              {isSignUp ? 'Fill in your details to sign up' : 'Sign in with your phone number and password'}
+              {isSignUp ? 'Fill in details to register as customer' : 'Enter authorized admin phone number and password'}
             </p>
           </div>
 
@@ -148,7 +144,7 @@ function AdminLogin({ onLoginSuccess }) {
                 <input
                   type="text"
                   required
-                  placeholder="Enter your phone number"
+                  placeholder="Enter phone number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-[#121f19] border border-emerald-900/50 rounded-xl text-sm text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
@@ -163,7 +159,7 @@ function AdminLogin({ onLoginSuccess }) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="Enter your password"
+                  placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-10 py-3 bg-[#121f19] border border-emerald-900/50 rounded-xl text-sm text-stone-200 placeholder-stone-500 focus:outline-none focus:border-emerald-500 transition"
@@ -182,14 +178,14 @@ function AdminLogin({ onLoginSuccess }) {
               type="submit"
               className="w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition duration-200 mt-2"
             >
-              <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+              <span>{isSignUp ? 'Register Customer' : 'Sign In as Admin'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-xs text-stone-400">
-              {isSignUp ? "Already have an account?" : "Don't have an account?"}{' '}
+              {isSignUp ? "Already have an account?" : "Need to register a customer account?"}{' '}
               <button
                 type="button"
                 onClick={() => {
@@ -199,7 +195,7 @@ function AdminLogin({ onLoginSuccess }) {
                 }}
                 className="text-emerald-400 font-bold hover:underline ml-1"
               >
-                {isSignUp ? 'Sign In' : 'Sign Up'}
+                {isSignUp ? 'Admin Sign In' : 'Sign Up'}
               </button>
             </p>
           </div>
@@ -211,7 +207,7 @@ function AdminLogin({ onLoginSuccess }) {
 }
 
 // ==========================================
-// 2. MAIN ADMIN DASHBOARD COMPONENT
+// 2. MAIN ADMIN DASHBOARD COMPONENT WITH ROLE GUARD
 // ==========================================
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -245,14 +241,22 @@ export default function AdminPanel() {
 
   useEffect(() => {
     const auth = localStorage.getItem('isAdminAuthenticated');
-    if (auth === 'true') {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+    // ROLE GUARD: যদি ইউজার লগইন থাকলেও তার Role 'admin' না হয়, তবে লগআউট করিয়ে দেবে
+    if (auth === 'true' && currentUser.role === 'admin') {
       setIsAuthenticated(true);
       fetchData();
+    } else {
+      localStorage.removeItem('isAdminAuthenticated');
+      localStorage.removeItem('currentUser');
+      setIsAuthenticated(false);
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('isAdminAuthenticated');
+    localStorage.removeItem('currentUser');
     setIsAuthenticated(false);
   };
 
@@ -311,7 +315,6 @@ export default function AdminPanel() {
     }
   };
 
-  // STRICT DATABASE DELETION HANDLER
   const handleDeleteProduct = async (product) => {
     const targetId = product._id || product.id;
 
@@ -340,7 +343,6 @@ export default function AdminPanel() {
     }
   };
 
-  // ORDER STATUS UPDATE HANDLER
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       setLoading(true);
@@ -591,7 +593,6 @@ export default function AdminPanel() {
                     <div className="text-right space-y-2">
                       <p className="font-bold text-stone-100">৳ {ord.totalAmount || ord.total || 0}</p>
                       
-                      {/* Dynamic Status Dropdown */}
                       <select
                         value={ord.status || 'Pending'}
                         onChange={(e) => handleStatusChange(ord._id || ord.id, e.target.value)}
