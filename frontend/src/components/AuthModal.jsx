@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Mail } from 'lucide-react';
+import { X, User, Lock, Phone } from 'lucide-react';
 import axios from 'axios';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  // 1. email পরিবর্তন করে phone রাখা হলো
+  const [formData, setFormData] = useState({ name: '', phone: '', password: '' });
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -20,7 +21,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       const res = await axios.post(`${API_BASE_URL}${endpoint}`, formData);
       localStorage.setItem('userToken', res.data.token);
       localStorage.setItem('userData', JSON.stringify(res.data.user));
-      onLoginSuccess(res.data.user);
+      if (onLoginSuccess) onLoginSuccess(res.data.user);
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong!');
@@ -61,17 +62,18 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
           )}
 
+          {/* 2. Email বদলে Phone Number ইনপুট ফিল্ড */}
           <div>
-            <label className="text-xs font-semibold text-[#1e2e24]">Email Address</label>
+            <label className="text-xs font-semibold text-[#1e2e24]">Phone Number</label>
             <div className="flex items-center gap-2 bg-[#e5e3d8] border border-[#c4c1b2] rounded-xl px-3 py-2 mt-1">
-              <Mail className="w-4 h-4 text-stone-500" />
+              <Phone className="w-4 h-4 text-stone-500" />
               <input
-                type="email"
+                type="tel"
                 required
                 className="bg-transparent text-xs w-full outline-none text-[#0f1712]"
-                placeholder="email@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="017XXXXXXXX"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               />
             </div>
           </div>
