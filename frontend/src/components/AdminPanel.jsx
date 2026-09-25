@@ -81,9 +81,40 @@ function AdminLogin({ onLoginSuccess }) {
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-600/20 rounded-full blur-2xl"></div>
           
           <div>
-            <div className="inline-flex items-center gap-2 bg-emerald-900/80 border border-emerald-700/50 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-6">
-              <Leaf className="w-3.5 h-3.5 text-emerald-400" />
-              The Moss Wanderer
+            {/* Perfectly Centered Brand Logo Section */}
+            <div 
+              className="flex flex-col items-center justify-center text-center cursor-pointer mb-8 w-full" 
+              onClick={() => window.location.href = '/'}
+            >
+              {/* Custom Leaf Icon */}
+              <div className="w-8 h-8 mb-2">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  {/* Left Side - Dark Green */}
+                  <path d="M50 12 C 22 25, 18 68, 50 88 C 48 60, 46 32, 50 12 Z" fill="#104f37" />
+                  {/* Right Side - Light Olive Green */}
+                  <path d="M50 12 C 78 25, 82 68, 50 88 C 52 60, 54 32, 50 12 Z" fill="#8da385" />
+                  {/* Left Inner Leaf Veins */}
+                  <path d="M 50 35 Q 36 32, 30 28 M 50 50 Q 34 46, 26 40 M 50 65 Q 36 60, 28 52 M 50 78 Q 40 73, 34 66" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                  {/* Right Inner Leaf Veins */}
+                  <path d="M 50 35 Q 64 32, 70 28 M 50 50 Q 66 46, 74 40 M 50 65 Q 64 60, 72 52 M 50 78 Q 60 73, 66 66" stroke="#104f37" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                  {/* Center Stem */}
+                  <path d="M50 12 L 50 94" stroke="#104f37" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+              </div>
+
+              {/* Logo Title */}
+              <span className="font-extrabold text-xs tracking-[0.2em] text-emerald-100 uppercase whitespace-nowrap leading-none mb-1.5">
+                THE MOSS WANDERER
+              </span>
+
+              {/* Subtitle with side lines */}
+              <div className="flex items-center justify-center gap-2 w-full">
+                <span className="h-[1px] bg-emerald-400/50 w-5"></span>
+                <span className="text-[8px] font-bold tracking-[0.18em] text-emerald-300 uppercase whitespace-nowrap leading-none">
+                  NATURE CONTAINED
+                </span>
+                <span className="h-[1px] bg-emerald-400/50 w-5"></span>
+              </div>
             </div>
             
             <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-emerald-50 mb-4">
