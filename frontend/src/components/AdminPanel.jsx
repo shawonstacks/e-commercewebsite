@@ -9,7 +9,7 @@ import {
 const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
-// 1. PREMIUM ADMIN LOGIN COMPONENT (UNTOUCHED LOGIC)
+// 1. PREMIUM ADMIN LOGIN COMPONENT
 // ==========================================
 function AdminLogin({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -82,7 +82,6 @@ function AdminLogin({ onLoginSuccess }) {
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-600/20 rounded-full blur-2xl"></div>
           
           <div>
-            {/* Perfectly Centered Brand Logo Section */}
             <div 
               className="flex flex-col items-center justify-center text-center cursor-pointer mb-8 w-full" 
               onClick={() => window.location.href = '/'}
@@ -245,6 +244,7 @@ export default function AdminPanel() {
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Filters
@@ -261,12 +261,14 @@ export default function AdminPanel() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [prodRes, orderRes] = await Promise.all([
+      const [prodRes, orderRes, customRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/products`),
-        axios.get(`${API_BASE_URL}/api/orders`)
+        axios.get(`${API_BASE_URL}/api/orders`),
+        axios.get(`${API_BASE_URL}/api/custom-enquiries`).catch(() => ({ data: [] }))
       ]);
       setProducts(prodRes.data || []);
       setOrders(orderRes.data || []);
+      setEnquiries(customRes.data || []);
     } catch (err) {
       console.error('Error fetching data from API:', err);
     } finally {
@@ -511,7 +513,7 @@ export default function AdminPanel() {
             </button>
 
             <button
-              onClick={() => { setActiveTab('custom'); }}
+              onClick={() => { setActiveTab('custom'); fetchData(); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                 activeTab === 'custom'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
@@ -522,8 +524,10 @@ export default function AdminPanel() {
                 <Sparkles className="w-4 h-4 text-emerald-400" />
                 <span>Custom Enquiries</span>
               </div>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                New
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                activeTab === 'custom' ? 'bg-emerald-800 text-white' : 'bg-stone-800 text-stone-400'
+              }`}>
+                {enquiries.length}
               </span>
             </button>
 
@@ -829,26 +833,60 @@ export default function AdminPanel() {
             </div>
           )}
 
-          {/* TAB 3: CUSTOM TERRARIUM ENQUIRIES (NEW READY FEATURE) */}
+          {/* TAB 3: CUSTOM TERRARIUM ENQUIRIES */}
           {activeTab === 'custom' && (
             <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                 <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-emerald-600" />
-                  Custom Terrarium Design Queries
+                  Custom Terrarium Design Queries ({enquiries.length})
                 </h3>
                 <span className="text-xs text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                   Customer Wishlists
                 </span>
               </div>
 
-              <div className="text-center py-12 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
-                <Sparkles className="w-8 h-8 text-emerald-600 mx-auto mb-2 opacity-60" />
-                <h4 className="text-xs font-bold text-stone-700">Custom Request Portal Active</h4>
-                <p className="text-[11px] text-stone-400 mt-1 max-w-sm mx-auto">
-                  When customers submit custom jar dimensions or plant preferences via WhatsApp or form, they will appear right here.
-                </p>
-              </div>
+              {enquiries.length === 0 ? (
+                <div className="text-center py-12 bg-stone-50 rounded-2xl border border-dashed border-stone-200">
+                  <Sparkles className="w-8 h-8 text-emerald-600 mx-auto mb-2 opacity-60" />
+                  <h4 className="text-xs font-bold text-stone-700">No Custom Enquiries Received Yet</h4>
+                  <p className="text-[11px] text-stone-400 mt-1 max-w-sm mx-auto">
+                    When customers submit custom requests from the storefront, they will show up right here.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {enquiries.map((item, idx) => (
+                    <div 
+                      key={item._id || idx} 
+                      className="bg-stone-50 border border-stone-200 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-600/40 transition"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] font-bold text-emerald-900 bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded">
+                            {item.jarType || 'Custom Jar'} • {item.theme || 'Forest'}
+                          </span>
+                          <span className="text-[10px] text-stone-400">
+                            {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recent'}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-stone-900 mt-1">Customer: {item.customerName}</p>
+                        <p className="text-xs text-stone-600">Phone: {item.phone}</p>
+                        {item.details && (
+                          <p className="text-[11px] text-stone-500 italic bg-white p-2 rounded-xl border border-stone-200 mt-1">
+                            "{item.details}"
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-bold text-stone-500">Proposed Budget</p>
+                        <p className="text-base font-extrabold text-emerald-800">৳ {(Number(item.budget) || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
