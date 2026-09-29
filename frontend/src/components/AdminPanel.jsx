@@ -3,13 +3,13 @@ import axios from 'axios';
 import { 
   Phone, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, 
   LogOut, LayoutDashboard, Package, ShoppingBag, Plus, Trash2, ArrowLeft, User, 
-  Search, Filter, AlertTriangle, Sparkles, CheckCircle2, Clock, XCircle, Store
+  Search, Filter, Sparkles, Clock, Store, Menu, X
 } from 'lucide-react';
 
 const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 // ==========================================
-// 1. PREMIUM ADMIN LOGIN COMPONENT
+// 1. MOBILE RESPONSIVE ADMIN LOGIN COMPONENT
 // ==========================================
 function AdminLogin({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -74,19 +74,19 @@ function AdminLogin({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-stone-100 text-slate-800 flex items-center justify-center p-6 font-sans">
-      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-3xl border border-stone-200/80 shadow-2xl overflow-hidden">
+    <div className="min-h-screen w-full bg-stone-100 text-slate-800 flex items-center justify-center p-3 sm:p-6 font-sans">
+      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl sm:rounded-3xl border border-stone-200/80 shadow-xl overflow-hidden">
         
         {/* Left Banner */}
-        <div className="bg-[#0b1f16] p-10 text-white flex flex-col justify-between relative overflow-hidden">
+        <div className="bg-[#0b1f16] p-6 sm:p-10 text-white flex flex-col justify-between relative overflow-hidden">
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-600/20 rounded-full blur-2xl"></div>
           
           <div>
             <div 
-              className="flex flex-col items-center justify-center text-center cursor-pointer mb-8 w-full" 
+              className="flex flex-col items-center justify-center text-center cursor-pointer mb-6 sm:mb-8 w-full" 
               onClick={() => window.location.href = '/'}
             >
-              <div className="w-9 h-9 mb-2">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 mb-2">
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   <path d="M50 12 C 22 25, 18 68, 50 88 C 48 60, 46 32, 50 12 Z" fill="#104f37" />
                   <path d="M50 12 C 78 25, 82 68, 50 88 C 52 60, 54 32, 50 12 Z" fill="#8da385" />
@@ -96,39 +96,39 @@ function AdminLogin({ onLoginSuccess }) {
                 </svg>
               </div>
 
-              <span className="font-extrabold text-xs tracking-[0.2em] text-emerald-100 uppercase whitespace-nowrap leading-none mb-1.5">
+              <span className="font-extrabold text-[11px] sm:text-xs tracking-[0.18em] sm:tracking-[0.2em] text-emerald-100 uppercase whitespace-nowrap leading-none mb-1.5">
                 THE MOSS WANDERER
               </span>
 
               <div className="flex items-center justify-center gap-2 w-full">
-                <span className="h-[1px] bg-emerald-400/50 w-5"></span>
-                <span className="text-[8px] font-bold tracking-[0.18em] text-emerald-300 uppercase whitespace-nowrap leading-none">
+                <span className="h-[1px] bg-emerald-400/50 w-4 sm:w-5"></span>
+                <span className="text-[7px] sm:text-[8px] font-bold tracking-[0.15em] sm:tracking-[0.18em] text-emerald-300 uppercase whitespace-nowrap leading-none">
                   NATURE CONTAINED
                 </span>
-                <span className="h-[1px] bg-emerald-400/50 w-5"></span>
+                <span className="h-[1px] bg-emerald-400/50 w-4 sm:w-5"></span>
               </div>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-emerald-50 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight text-emerald-50 mb-3 sm:mb-4 text-center md:text-left">
               {isSignUp ? "Join Our Community." : "Admin Control Center."}
             </h1>
             
-            <p className="text-emerald-200/70 text-xs leading-relaxed">
+            <p className="text-emerald-200/70 text-xs leading-relaxed text-center md:text-left">
               {isSignUp
                 ? "Create an account to manage your orders and explore handcrafted terrariums."
                 : "Manage inventory, track customer orders, and update products with full store authority."}
             </p>
           </div>
 
-          <div className="pt-8 border-t border-emerald-900/80 text-[11px] text-emerald-400/80 font-medium text-center">
+          <div className="pt-6 sm:pt-8 border-t border-emerald-900/80 text-[10px] sm:text-[11px] text-emerald-400/80 font-medium text-center">
             &copy; {new Date().getFullYear()} The Moss Wanderer. All rights reserved.
           </div>
         </div>
 
         {/* Right Form */}
-        <div className="p-8 md:p-10 flex flex-col justify-center">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
+        <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+          <div className="mb-5 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
@@ -148,7 +148,7 @@ function AdminLogin({ onLoginSuccess }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
             {isSignUp && (
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name</label>
@@ -160,7 +160,7 @@ function AdminLogin({ onLoginSuccess }) {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
                   />
                 </div>
               </div>
@@ -176,7 +176,7 @@ function AdminLogin({ onLoginSuccess }) {
                   placeholder="017xxxxxxxx"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
                 />
               </div>
             </div>
@@ -191,7 +191,7 @@ function AdminLogin({ onLoginSuccess }) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
+                  className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600 focus:bg-white transition"
                 />
                 <button
                   type="button"
@@ -212,7 +212,7 @@ function AdminLogin({ onLoginSuccess }) {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 text-center">
             <p className="text-xs text-slate-500">
               {isSignUp ? "Already have an account?" : "Need a customer account?"}{' '}
               <button
@@ -236,11 +236,12 @@ function AdminLogin({ onLoginSuccess }) {
 }
 
 // ==========================================
-// 2. ENHANCED MAIN ADMIN DASHBOARD COMPONENT
+// 2. ENHANCED MOBILE RESPONSIVE DASHBOARD
 // ==========================================
 export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('orders');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile Menu Drawer
 
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -436,46 +437,65 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 text-stone-800 font-sans flex">
+    <div className="min-h-screen bg-stone-100 text-stone-800 font-sans flex flex-col md:flex-row">
       
-      {/* SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-[#0a1711] text-stone-300 flex flex-col justify-between p-4 min-h-screen border-r border-stone-800 sticky top-0 h-screen shrink-0">
+      {/* MOBILE OVERLAY BACKDROP */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+        />
+      )}
+
+      {/* SIDEBAR NAVIGATION (Desktop & Mobile Drawer) */}
+      <aside className={`fixed md:sticky top-0 left-0 z-50 w-64 bg-[#0a1711] text-stone-300 flex flex-col justify-between p-4 h-screen border-r border-stone-800 transition-transform duration-300 ease-in-out shrink-0 ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
         <div className="space-y-6">
           
-          {/* BRAND LOGO CARD */}
-          <div 
-            className="bg-[#f2f1ea] p-4 rounded-2xl shadow-inner text-center font-sans border border-stone-300/80 cursor-pointer"
-            onClick={() => window.location.href = '/'}
-          >
-            <div className="flex justify-center mb-1.5">
-              <div className="w-7 h-7">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  <path d="M50 12 C 22 25, 18 68, 50 88 C 48 60, 46 32, 50 12 Z" fill="#1f382b" />
-                  <path d="M50 12 C 78 25, 82 68, 50 88 C 52 60, 54 32, 50 12 Z" fill="#8da385" />
-                  <path d="M 50 35 Q 36 32, 30 28 M 50 50 Q 34 46, 26 40 M 50 65 Q 36 60, 28 52 M 50 78 Q 40 73, 34 66" stroke="#f2f1ea" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                  <path d="M 50 35 Q 64 32, 70 28 M 50 50 Q 66 46, 74 40 M 50 65 Q 64 60, 72 52 M 50 78 Q 60 73, 66 66" stroke="#1f382b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                  <path d="M50 12 L 50 94" stroke="#1f382b" strokeWidth="3" strokeLinecap="round" />
-                </svg>
+          {/* MOBILE CLOSE BUTTON & BRAND CARD */}
+          <div className="relative">
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden absolute right-2 top-2 text-stone-400 hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div 
+              className="bg-[#f2f1ea] p-4 rounded-2xl shadow-inner text-center font-sans border border-stone-300/80 cursor-pointer"
+              onClick={() => window.location.href = '/'}
+            >
+              <div className="flex justify-center mb-1.5">
+                <div className="w-7 h-7">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <path d="M50 12 C 22 25, 18 68, 50 88 C 48 60, 46 32, 50 12 Z" fill="#1f382b" />
+                    <path d="M50 12 C 78 25, 82 68, 50 88 C 52 60, 54 32, 50 12 Z" fill="#8da385" />
+                    <path d="M 50 35 Q 36 32, 30 28 M 50 50 Q 34 46, 26 40 M 50 65 Q 36 60, 28 52 M 50 78 Q 40 73, 34 66" stroke="#f2f1ea" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M 50 35 Q 64 32, 70 28 M 50 50 Q 66 46, 74 40 M 50 65 Q 64 60, 72 52 M 50 78 Q 60 73, 66 66" stroke="#1f382b" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M50 12 L 50 94" stroke="#1f382b" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                </div>
               </div>
-            </div>
 
-            <h1 className="text-[11px] font-black tracking-[0.18em] uppercase text-[#0d0d0d] leading-none mb-1.5">
-              THE MOSS WANDERER
-            </h1>
+              <h1 className="text-[11px] font-black tracking-[0.18em] uppercase text-[#0d0d0d] leading-none mb-1.5">
+                THE MOSS WANDERER
+              </h1>
 
-            <div className="flex items-center justify-center gap-1 text-[#1f382b]">
-              <span className="h-[1px] w-3 bg-[#1f382b]/80"></span>
-              <span className="text-[7px] font-extrabold tracking-[0.15em] uppercase">
-                ADMIN PORTAL
-              </span>
-              <span className="h-[1px] w-3 bg-[#1f382b]/80"></span>
+              <div className="flex items-center justify-center gap-1 text-[#1f382b]">
+                <span className="h-[1px] w-3 bg-[#1f382b]/80"></span>
+                <span className="text-[7px] font-extrabold tracking-[0.15em] uppercase">
+                  ADMIN PORTAL
+                </span>
+                <span className="h-[1px] w-3 bg-[#1f382b]/80"></span>
+              </div>
             </div>
           </div>
 
           {/* Nav Items */}
           <nav className="space-y-1.5">
             <button
-              onClick={() => { setActiveTab('orders'); fetchData(); }}
+              onClick={() => { setActiveTab('orders'); fetchData(); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                 activeTab === 'orders'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
@@ -494,7 +514,7 @@ export default function AdminPanel() {
             </button>
 
             <button
-              onClick={() => { setActiveTab('products'); fetchData(); }}
+              onClick={() => { setActiveTab('products'); fetchData(); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                 activeTab === 'products'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
@@ -513,7 +533,7 @@ export default function AdminPanel() {
             </button>
 
             <button
-              onClick={() => { setActiveTab('custom'); fetchData(); }}
+              onClick={() => { setActiveTab('custom'); fetchData(); setIsSidebarOpen(false); }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                 activeTab === 'custom'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
@@ -532,7 +552,7 @@ export default function AdminPanel() {
             </button>
 
             <button
-              onClick={() => { setActiveTab('dashboard'); fetchData(); }}
+              onClick={() => { setActiveTab('dashboard'); fetchData(); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
                 activeTab === 'dashboard'
                   ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/30'
@@ -568,39 +588,49 @@ export default function AdminPanel() {
       {/* RIGHT CONTENT WORKSPACE */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        {/* TOP HEADER BAR */}
-        <header className="bg-white border-b border-stone-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-          <div>
-            <h1 className="text-base font-bold text-stone-900 capitalize flex items-center gap-2">
-              <span>{activeTab === 'custom' ? 'Custom Enquiries' : `${activeTab} Management`}</span>
-              {loading && <span className="text-[11px] text-emerald-700 font-semibold animate-pulse">(Updating...)</span>}
-            </h1>
-            <p className="text-xs text-stone-500">Real-time control center for The Moss Wanderer</p>
+        {/* TOP HEADER BAR WITH MOBILE TOGGLE */}
+        <header className="bg-white border-b border-stone-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="md:hidden p-2 rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition"
+              title="Open Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <div>
+              <h1 className="text-sm sm:text-base font-bold text-stone-900 capitalize flex items-center gap-1.5 sm:gap-2">
+                <span>{activeTab === 'custom' ? 'Custom Enquiries' : `${activeTab} Management`}</span>
+                {loading && <span className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold animate-pulse">(Updating...)</span>}
+              </h1>
+              <p className="text-[10px] sm:text-xs text-stone-500 hidden sm:block">Real-time control center for The Moss Wanderer</p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {pendingOrdersCount > 0 && (
-              <span className="flex items-center gap-1.5 text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80 px-3 py-1 rounded-full">
-                <Clock className="w-3.5 h-3.5 text-amber-600" />
-                {pendingOrdersCount} Pending Orders
+              <span className="flex items-center gap-1 text-[11px] sm:text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-1 rounded-full">
+                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-600" />
+                <span>{pendingOrdersCount} Pending</span>
               </span>
             )}
 
-            <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center font-extrabold text-emerald-900 text-xs">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center font-extrabold text-emerald-900 text-xs shrink-0">
               A
             </div>
           </div>
         </header>
 
         {/* MAIN BODY AREA */}
-        <main className="p-8 flex-1 max-w-7xl w-full mx-auto space-y-6">
+        <main className="p-4 sm:p-8 flex-1 max-w-7xl w-full mx-auto space-y-6 overflow-x-hidden">
           
           {/* TAB 1: CUSTOMER ORDERS */}
           {activeTab === 'orders' && (
             <div className="space-y-4">
               
               {/* Filter Bar */}
-              <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row gap-3 justify-between items-center">
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row gap-3 justify-between items-center">
                 <div className="relative w-full sm:w-72">
                   <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -612,8 +642,8 @@ export default function AdminPanel() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                  <Filter className="w-4 h-4 text-emerald-700 shrink-0 mr-1" />
+                <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                  <Filter className="w-4 h-4 text-emerald-700 shrink-0 mr-1 hidden sm:block" />
                   {['All', 'Pending', 'Processing', 'Completed', 'Cancelled'].map((st) => (
                     <button
                       key={st}
@@ -631,12 +661,12 @@ export default function AdminPanel() {
               </div>
 
               {/* Orders List Container */}
-              <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                  <h3 className="text-sm font-bold text-stone-900">
+                  <h3 className="text-xs sm:text-sm font-bold text-stone-900">
                     Customer Orders ({filteredOrders.length})
                   </h3>
-                  <span className="text-xs text-stone-400">Total in Database: {orders.length}</span>
+                  <span className="text-[11px] text-stone-400">Total: {orders.length}</span>
                 </div>
                 
                 {filteredOrders.length === 0 ? (
@@ -648,11 +678,11 @@ export default function AdminPanel() {
                     {filteredOrders.map((ord, idx) => (
                       <div 
                         key={ord._id || ord.id || idx} 
-                        className="bg-stone-50/70 border border-stone-200 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-emerald-600/40 transition"
+                        className="bg-stone-50/70 border border-stone-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-emerald-600/40 transition"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-emerald-900 bg-emerald-100/80 border border-emerald-200 px-2.5 py-0.5 rounded text-[11px]">
+                            <span className="font-mono font-bold text-emerald-900 bg-emerald-100/80 border border-emerald-200 px-2 py-0.5 rounded text-[10px] sm:text-[11px]">
                               #ORD-{(ord._id ? ord._id.slice(-6) : (ord.id || idx + 1)).toUpperCase()}
                             </span>
                             <span className="text-[10px] text-stone-400 font-medium">
@@ -664,23 +694,23 @@ export default function AdminPanel() {
                             Customer: {ord.customerName || ord.name || 'Guest Customer'}
                           </p>
                           <p className="text-stone-600 text-xs">Phone: {ord.phone || 'N/A'}</p>
-                          <p className="text-stone-500 text-[11px]">
-                            Shipping Address: {ord.shippingAddress || ord.address || 'N/A'}
+                          <p className="text-stone-500 text-[11px] break-words">
+                            Address: {ord.shippingAddress || ord.address || 'N/A'}
                           </p>
                         </div>
                         
-                        <div className="flex sm:flex-col items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-stone-200">
-                          <p className="font-extrabold text-stone-900 text-base">
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-stone-200">
+                          <p className="font-extrabold text-stone-900 text-sm sm:text-base">
                             ৳ {(Number(ord.totalAmount || ord.total) || 0).toLocaleString()}
                           </p>
                           
                           <select
                             value={ord.status || 'Pending'}
                             onChange={(e) => handleStatusChange(ord._id || ord.id, e.target.value)}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-xl border focus:outline-none cursor-pointer transition ${getStatusBadgeStyle(ord.status || 'Pending')}`}
+                            className={`text-xs font-bold px-2.5 py-1.5 rounded-xl border focus:outline-none cursor-pointer transition ${getStatusBadgeStyle(ord.status || 'Pending')}`}
                           >
                             <option value="Pending">Pending</option>
-                            <option value="Processing">Processing / Crafting</option>
+                            <option value="Processing">Processing</option>
                             <option value="Completed">Completed</option>
                             <option value="Cancelled">Cancelled</option>
                           </select>
@@ -696,16 +726,16 @@ export default function AdminPanel() {
 
           {/* TAB 2: PRODUCTS & INVENTORY */}
           {activeTab === 'products' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
               {/* Form Card */}
-              <div className="lg:col-span-5 bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+              <div className="lg:col-span-5 bg-white border border-stone-200 rounded-2xl p-4 sm:p-6 shadow-sm">
                 <h3 className="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-emerald-700" />
                   Add New Product / Kit
                 </h3>
                 
-                <form onSubmit={handleAddProduct} className="space-y-4">
+                <form onSubmit={handleAddProduct} className="space-y-3.5">
                   <div>
                     <label className="block text-xs text-stone-600 font-semibold mb-1">Product Title</label>
                     <input
@@ -718,7 +748,7 @@ export default function AdminPanel() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs text-stone-600 font-semibold mb-1">Price (৳)</label>
                       <input
@@ -763,10 +793,10 @@ export default function AdminPanel() {
                   </div>
 
                   <div>
-                    <label className="block text-xs text-stone-600 font-semibold mb-1">Description & Plant Care Note</label>
+                    <label className="block text-xs text-stone-600 font-semibold mb-1">Description & Care Note</label>
                     <textarea
                       rows="3"
-                      placeholder="e.g. Contains live Cushion Moss & Fittonia plant. Indirect light needed."
+                      placeholder="e.g. Contains live Cushion Moss & Fittonia plant."
                       value={productDescription}
                       onChange={(e) => setProductDescription(e.target.value)}
                       className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-800 focus:outline-none focus:border-emerald-600 focus:bg-white resize-none"
@@ -785,7 +815,7 @@ export default function AdminPanel() {
               </div>
 
               {/* Product List */}
-              <div className="lg:col-span-7 bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <div className="lg:col-span-7 bg-white border border-stone-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-stone-900">
                   Active Products Catalog ({products.length})
                 </h3>
@@ -797,20 +827,20 @@ export default function AdminPanel() {
                     products.map((item) => (
                       <div 
                         key={item._id || item.id}
-                        className="bg-stone-50 border border-stone-200 p-3.5 rounded-2xl flex items-center justify-between gap-4 transition hover:border-stone-300"
+                        className="bg-stone-50 border border-stone-200 p-3 sm:p-3.5 rounded-2xl flex items-center justify-between gap-3 transition hover:border-stone-300"
                       >
-                        <div className="flex items-center gap-3.5">
+                        <div className="flex items-center gap-3">
                           <img 
                             src={getImageSrc(item.image || item.imageUrl)} 
                             alt={item.name} 
-                            className="w-12 h-12 object-cover rounded-xl border border-stone-200 shrink-0"
+                            className="w-11 h-11 sm:w-12 sm:h-12 object-cover rounded-xl border border-stone-200 shrink-0"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "https://via.placeholder.com/150?text=Error";
                             }}
                           />
                           <div>
-                            <h4 className="text-xs font-bold text-stone-800">{item.name}</h4>
+                            <h4 className="text-xs font-bold text-stone-800 line-clamp-1">{item.name}</h4>
                             <p className="text-[11px] text-stone-500 font-semibold mt-0.5">
                               ৳ {item.price} • <span className="text-emerald-800 font-bold">{item.category || 'Terrarium'}</span>
                             </p>
@@ -819,7 +849,7 @@ export default function AdminPanel() {
 
                         <button
                           onClick={() => handleDeleteProduct(item)}
-                          className="text-stone-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 transition"
+                          className="text-stone-400 hover:text-rose-600 p-2 rounded-xl hover:bg-rose-50 transition shrink-0"
                           title="Delete Product"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -835,13 +865,13 @@ export default function AdminPanel() {
 
           {/* TAB 3: CUSTOM TERRARIUM ENQUIRIES */}
           {activeTab === 'custom' && (
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-                <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-stone-900 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-emerald-600" />
-                  Custom Terrarium Design Queries ({enquiries.length})
+                  Custom Design Queries ({enquiries.length})
                 </h3>
-                <span className="text-xs text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] sm:text-xs text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                   Customer Wishlists
                 </span>
               </div>
@@ -859,11 +889,11 @@ export default function AdminPanel() {
                   {enquiries.map((item, idx) => (
                     <div 
                       key={item._id || idx} 
-                      className="bg-stone-50 border border-stone-200 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-emerald-600/40 transition"
+                      className="bg-stone-50 border border-stone-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-emerald-600/40 transition"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold text-emerald-900 bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 rounded">
+                          <span className="font-mono text-[10px] font-bold text-emerald-900 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded">
                             {item.jarType || 'Custom Jar'} • {item.theme || 'Forest'}
                           </span>
                           <span className="text-[10px] text-stone-400">
@@ -873,15 +903,15 @@ export default function AdminPanel() {
                         <p className="text-xs font-bold text-stone-900 mt-1">Customer: {item.customerName}</p>
                         <p className="text-xs text-stone-600">Phone: {item.phone}</p>
                         {item.details && (
-                          <p className="text-[11px] text-stone-500 italic bg-white p-2 rounded-xl border border-stone-200 mt-1">
+                          <p className="text-[11px] text-stone-500 italic bg-white p-2 rounded-xl border border-stone-200 mt-1 break-words">
                             "{item.details}"
                           </p>
                         )}
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <p className="text-xs font-bold text-stone-500">Proposed Budget</p>
-                        <p className="text-base font-extrabold text-emerald-800">৳ {(Number(item.budget) || 0).toLocaleString()}</p>
+                      <div className="text-left sm:text-right shrink-0">
+                        <p className="text-[11px] font-bold text-stone-500">Proposed Budget</p>
+                        <p className="text-sm sm:text-base font-extrabold text-emerald-800">৳ {(Number(item.budget) || 0).toLocaleString()}</p>
                       </div>
                     </div>
                   ))}
@@ -893,24 +923,24 @@ export default function AdminPanel() {
           {/* TAB 4: OVERVIEW DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
-              <h1 className="text-base font-bold text-stone-900">Store Analytics & Summary</h1>
+              <h1 className="text-sm sm:text-base font-bold text-stone-900">Store Analytics & Summary</h1>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
                   <p className="text-xs text-stone-500 font-semibold">Total Received Orders</p>
-                  <h3 className="text-3xl font-extrabold text-emerald-900">{totalOrdersCount}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-900">{totalOrdersCount}</h3>
                   <p className="text-[11px] text-amber-700 font-medium">{pendingOrdersCount} orders currently pending</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+                <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
                   <p className="text-xs text-stone-500 font-semibold">Active Catalog Products</p>
-                  <h3 className="text-3xl font-extrabold text-emerald-900">{activeProductsCount}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-900">{activeProductsCount}</h3>
                   <p className="text-[11px] text-emerald-700 font-medium">Ready for online storefront</p>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
+                <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-2">
                   <p className="text-xs text-stone-500 font-semibold">Total Revenue Generated</p>
-                  <h3 className="text-3xl font-extrabold text-emerald-900">৳ {totalRevenue.toLocaleString()}</h3>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-900">৳ {totalRevenue.toLocaleString()}</h3>
                   <p className="text-[11px] text-stone-400 font-medium">Calculated from order total amounts</p>
                 </div>
               </div>
