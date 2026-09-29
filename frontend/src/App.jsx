@@ -6,9 +6,10 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import ProductModal from './components/ProductModal';
 import AuthModal from './components/AuthModal';
+import CustomModal from './components/CustomModal';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
-import { Leaf, MessageCircle, Search, Filter } from 'lucide-react';
+import { Leaf, MessageCircle, Search, Filter, Sparkles } from 'lucide-react';
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -16,6 +17,9 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Custom Order Modal State
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
 
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,7 +107,7 @@ function App() {
           onClose={() => setIsCartOpen(false)} 
           cart={cart} 
           setCart={setCart} 
-          onCheckout={() => setIsCheckoutOpen(true)}
+          onCheckout={() => setIsCheckoutOpen(false)}
         />
 
         <CheckoutModal 
@@ -126,6 +130,12 @@ function App() {
           onLoginSuccess={(userData) => setUser(userData)} 
         />
 
+        {/* Custom Terrarium Request Modal */}
+        <CustomModal 
+          isOpen={isCustomModalOpen} 
+          onClose={() => setIsCustomModalOpen(false)} 
+        />
+
         {/* Floating WhatsApp Button */}
         <a 
           href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
@@ -141,12 +151,12 @@ function App() {
         {/* New Hero Section Component */}
         <Hero />
 
-        {/* Search & Filter Section */}
+        {/* Search, Filter & Custom Request Section */}
         <div className="max-w-6xl mx-auto px-4 mb-8">
           <div className="bg-[#121c18] border border-emerald-900/40 p-3 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg">
             
             {/* Search Input */}
-            <div className="relative w-full md:w-80">
+            <div className="relative w-full md:w-72">
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -157,14 +167,24 @@ function App() {
               />
             </div>
 
-            {/* Category Buttons */}
-            <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-              <Filter className="w-4 h-4 text-emerald-500 mr-1" />
+            {/* Custom Request & Category Buttons */}
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+              
+              {/* Custom Order Button */}
+              <button
+                onClick={() => setIsCustomModalOpen(true)}
+                className="bg-emerald-800/80 hover:bg-emerald-700 text-emerald-100 border border-emerald-600/50 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow-md shadow-emerald-950/40 mr-2"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Custom Order</span>
+              </button>
+
+              <Filter className="w-4 h-4 text-emerald-500 mr-1 hidden sm:block" />
               {['All', 'Terrarium', 'Moss Art'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
                     selectedCategory === cat
                       ? 'bg-emerald-500 text-stone-950 font-bold'
                       : 'bg-[#182620] text-stone-300 hover:bg-emerald-900/40 border border-emerald-900/30'

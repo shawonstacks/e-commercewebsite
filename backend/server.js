@@ -20,6 +20,8 @@ app.use(express.urlencoded({ limit: '500mb', extended: true }));
 // Static Uploads Folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use('/api/custom-enquiries', require('./routes/customRoutes'));
+
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://e-commerce-db:27017/moss-wanderer';
 mongoose.connect(MONGO_URI)
